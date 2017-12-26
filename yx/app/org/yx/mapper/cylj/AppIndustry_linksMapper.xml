@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppIndustry_linksMapper"> 
+	
+	<!--根据行业查询公司列表信息--> 
+	<select id="queryByIndex" resultType="pd" parameterType="pd">
+	  SELECT ID,COMPANY_NAME,LOGO,LINK FROM jl_industry_links 
+		WHERE ISDEL=1 ORDER BY CREATE_BY ASC 
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	 
+</mapper>

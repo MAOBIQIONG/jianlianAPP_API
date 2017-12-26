@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppUsertokenMapper">
+	<!-- 新增用户token信息 -->
+	<insert id="saveToken" parameterType="pd">
+		insert into app_users_token(
+		<if test="userid != null and userid != ''">
+			app_users_id,
+		</if>
+		<if test="token != null and token != ''">
+			token,
+		</if>
+		<if test="last_active_date != null and last_active_date != ''">
+			last_active_date
+		</if>
+		) values (
+		<if test="userid != null and userid != ''">
+			#{userid},
+		</if>
+		<if test="token != null and token != ''">
+			#{token},
+		</if>
+		<if test="last_active_date != null and last_active_date != ''">
+			#{last_active_date}
+		</if>
+		)
+	</insert>
+
+	<!-- 修改用户token信息 -->
+	<update id="editToken" parameterType="pd">
+		update app_users_token set
+		<if test="token != null and token != ''">
+			token = #{token},
+		</if>
+		<if test="last_active_date != null and last_active_date != ''">
+			last_active_date = #{last_active_date},
+		</if>
+		app_users_id = #{userid}
+		where app_users_id = #{userid}
+	</update>
+
+	<!-- 登录时查询用户的token信息 -->
+	<select id="findToken" parameterType="pd" resultType="pd">
+		select app_users_id as userid, token, last_active_date
+		from app_users_token where token=#{token}
+	</select>
+	<!-- 检查token -->
+	<select id="checkToken" parameterType="pd" resultType="pd">
+		select
+		app_users_id as userid,
+		token,
+		last_active_date
+		from app_users_token where
+		app_users_id=#{userid}
+	</select>
+
+
+	<!-- 根据token查询userid -->
+	<select id="queryToken" parameterType="pd" resultType="pd">
+		SELECT
+		a.id as userid,
+		a.register_date, 
+		a.last_login_date
+		FROM
+		app_users a LEFT JOIN
+		app_users_token b on a.id=b.app_users_id
+		WHERE
+		token = #{token}
+	</select>
+
+
+	<!-- 绑定第三方账号 -->
+	<update id="updateUsertoken" parameterType="pd">
+
+		UPDATE app_user
+		SET register_date = #{register_date}, 
+		last_login_date =#{last_login_date},
+		webchat = #{webchat},
+		qq = #{qq},
+		webo = #{webo}
+		WHERE
+		id = #{userid};
+	</update>
+
+
+
+
+	<!-- 检查第三方账号返回token -->
+	<select id="checkThirdparty" parameterType="pd" resultType="pd">
+		SELECT
+		b.app_users_id AS userid,
+		b.token,cp.COMPANY_NAME,a.POSITION,a.REAL_NAME,a.EMAIL,a.PHONE
+		FROM
+		app_user a
+		LEFT JOIN app_users_token b ON a.id=b.app_users_id
+		LEFT JOIN company cp ON a.ID=cp.CREATE_BY
+		WHERE 1=1  and a.isdel=1
+		 <if test="WEBCHAT !=null and WEBCHAT!=''">
+		   AND a.webchat = #{WEBCHAT}
+		</if> 
+		 <if test="QQ !=null and QQ!=''">
+		    AND a.qq = #{QQ}
+		</if> 
+		 <if test="WEBO !=null and WEBO!=''">
+		    AND a.webo = #{WEBO}
+		</if>  
+	</select> 
+	
+	
+	<!-- 查询最新的版本号 -->
+	<select id="queryNewCode" resultType="pd">
+		 select max(code) as code,max(del_code) as del_code from jl_app_code  
+	</select>  
+</mapper>

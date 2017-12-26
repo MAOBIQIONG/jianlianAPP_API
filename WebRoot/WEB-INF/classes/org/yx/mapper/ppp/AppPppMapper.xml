@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppPppMapper">
+	<!--列表 -->
+	<select id="queryBydiylist" resultType="pd" parameterType="pd">
+		SELECT PRO.*,SD.NAME AS SSHY,SF.NAME AS JD,SK.NAME AS JIBIE,PIMG.IMG_PATH AS IMGS,SA.areaname AS CITYS
+		FROM PPP_PROJECT PRO 
+		LEFT JOIN sys_dictionaries SD ON PRO.INDUSTRY=SD.BIANMA 
+		LEFT JOIN sys_dictionaries SF ON PRO.STAGE=SF.BIANMA 
+		LEFT JOIN sys_dictionaries SK ON PRO.LEVEL=SK.BIANMA 
+		LEFT JOIN ppp_xm_tp PIMG ON PRO.ID=PIMG.PRO_ID AND PIMG.ORDER_BY=0
+		LEFT JOIN SYS_AREA SA ON SA.areacode=PRO.CITY
+		WHERE PRO.STATUS &gt;3  and PRO.ISDEL=1
+		<if test="PROJECT_NAME !=null and PROJECT_NAME !=''">
+		    and PRO.PROJECT_NAME LIKE CONCAT(CONCAT('%', #{PROJECT_NAME}),'%')
+		</if>  
+		<!-- 行业编码 -->
+		<if test="INDUSTRY !=null and INDUSTRY !=''">
+		    and PRO.INDUSTRY=#{INDUSTRY}
+		</if>
+		<!-- 阶段 -->
+		<if test="STAGE !=null and STAGE !=''">
+		    and PRO.STAGE=#{STAGE}
+		</if>
+		<!-- 示范级别 -->
+		<if test="CITY !=null and CITY !=''">
+		    and PRO.CITY=#{CITY}
+		</if>
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	
+	<!--项目详情 -->
+	<select id="queryByPPPXQ" resultType="pd" parameterType="pd">
+		SELECT PRO.*,A.REAL_NAME,A.PHONE AS MANAGER_PHONE,SD.NAME AS SSHY,SF.NAME AS JD,SK.NAME AS JIBIE,D.NAME AS COM_LEVEL,SA.AREANAME AS CITYS FROM PPP_PROJECT PRO 
+		LEFT JOIN sys_dictionaries SD ON PRO.INDUSTRY=SD.BIANMA LEFT JOIN sys_dictionaries SF ON PRO.STAGE=SF.BIANMA 
+		LEFT JOIN sys_dictionaries SK ON PRO.LEVEL=SK.BIANMA LEFT JOIN sys_dictionaries D ON PRO.COM_QUALIFICATION=D.BIANMA
+		LEFT JOIN APP_USER A ON PRO.MANAGER=A.ID
+		LEFT JOIN SYS_AREA SA ON SA.AREACODE=PRO.CITY
+		WHERE PRO.ISDEL=1 AND PRO.ID=#{PID}
+	</select>
+	
+	<!--查询项目进度 -->
+	<select id="querySche" resultType="pd" parameterType="pd">
+		SELECT PRO.*,SD.NAME AS SSHY,SF.NAME AS JD,SK.NAME AS JIBIE FROM
+		PPP_PROJECT PRO LEFT JOIN sys_dictionaries SD ON
+		PRO.INDUSTRY=SD.BIANMA LEFT JOIN sys_dictionaries SF ON
+		PRO.STAGE=SF.BIANMA LEFT JOIN sys_dictionaries SK ON
+		PRO.LEVEL=SK.BIANMA
+		WHERE PRO.ISDEL=1 AND PRO.ID=#{PID}
+	</select>
+	
+	<!-- 根据项目id查询项目信息-->
+	<select id="queryById" parameterType="pd" resultType="pd">
+		SELECT * FROM PPP_PROJECT WHERE ID=#{PID}
+	</select> 
+	
+	<!--项目详情图片 -->
+	<select id="queryByPPPXQimg" resultType="pd" parameterType="pd">
+		SELECT * FROM ppp_xm_tp WHERE PRO_ID=#{PID}
+	</select>
+	
+	<!--项目进度 -->
+	<select id="queryByPPPJD" resultType="pd" parameterType="pd">
+		SELECT * FROM PPP_schedule PS LEFT JOIN sys_dictionaries SD ON PS.SCHEDULE=SD.BIANMA WHERE PS.PROJECT_ID=#{PID} AND PS.ISDEL=1 ORDER BY PS.SCHEDULE
+	</select> 
+	
+	<!-- 修改参与人数 -->
+	<update id="updateCounts" parameterType="pd">
+		UPDATE PPP_PROJECT SET  
+		<if test="TOTAL_BIDDER != null and TOTAL_BIDDER !=''">
+		   TOTAL_BIDDER=#{TOTAL_BIDDER},
+		</if>  
+		<if test="ISSYSLOOK != null and ISSYSLOOK !=''">
+		   ISSYSLOOK=#{ISSYSLOOK},
+		</if>  
+		ID=#{PID} WHERE ID=#{PID}
+    </update>  
+	
+	<!-- 查询我参与的项目信息（分页)-->
+	<select id="queryMYCYPRO" parameterType="pd" resultType="pd">
+		SELECT PRO.*,SD.NAME AS SSHY,SF.NAME AS JD,SK.NAME AS JIBIE,PIMG.IMG_PATH AS IMGS FROM
+		PPP_PROJECT PRO LEFT JOIN sys_dictionaries SD ON
+		PRO.INDUSTRY=SD.BIANMA LEFT JOIN sys_dictionaries SF ON
+		PRO.STAGE=SF.BIANMA LEFT JOIN sys_dictionaries SK ON
+		PRO.LEVEL=SK.BIANMA LEFT JOIN ppp_xm_tp PIMG ON 
+		PRO.ID=PIMG.PRO_ID AND PIMG.ORDER_BY=0
+		LEFT JOIN ppp_cy PC ON PC.PROJECT_ID=PRO.ID
+		WHERE PRO.ISDEL=1 AND PC.USER_ID=#{USER_ID} 
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!-- 查询我参与的项目信息（分页)-->
+	<select id="queryXMIMG" parameterType="pd" resultType="pd">
+		SELECT * FROM ppp_xm_tp WHERE PRO_ID=#{PID}
+	</select>  
+	  <!-- 查询项目经理的信息-->
+	<select id="queryManager" parameterType="pd" resultType="pd">
+		SELECT A.ID,A.REAL_NAME,A.PLATFORM,P.PROJECT_NAME,P.ID AS PID FROM APP_USER A LEFT JOIN PPP_PROJECT P ON A.ID=P.MANAGER WHERE P.ID=#{PID}
+	</select> 
+	
+<!-- PPP参与表相关信息开始 -->	 
+	<!--判断会员是否已经参与项目(USER_ID) -->
+	<select id="chenckIsInByUid" parameterType="pd" resultType="pd">
+		select * from PPP_CY where PROJECT_ID = #{PID} and USER_ID=#{USER_ID} 
+	</select> 
+	
+	<!--判断会员是否已经参与项目(PHONE) -->
+	<select id="chenckIsInByPhone" parameterType="pd" resultType="pd">
+		select * from PPP_CY where PROJECT_ID = #{PID} and PHONE=#{PHONE} 
+	</select> 
+	 
+	<!-- 我要参与项目 -->
+	<insert id="addBidder" parameterType="pd">
+		INSERT INTO PPP_CY(ID,PROJECT_ID,USER_ID,BID_DATE,PHONE) 
+		VALUES (#{ID},#{PID},#{USER_ID},#{BID_DATE},#{PHONE}) 
+	</insert>  
+	
+	<!-- 根据用户id取消接单 -->
+	 <delete id="cancleBidderByUid" parameterType="pd">
+		DELETE FROM PPP_CY WHERE PROJECT_ID=#{PID} AND USER_ID=#{USER_ID} 
+	</delete>   
+	
+	<!-- 根据用户留的手机号取消接单 -->
+	 <delete id="cancleBidderByPhone" parameterType="pd">
+		DELETE FROM PPP_CY WHERE PROJECT_ID=#{PID} AND PHONE=#{PHONE} 
+	</delete> 
+	
+	<!-- 查询某个交易的参与用户信息 -->
+	<select id="queryBidders" resultType="pd" parameterType="pd"> 
+       SELECT  A.ID,A.REAL_NAME,A.IMG,A.POSITION,A.VIP_LEVEL,A.FLAG,A.SHOW_NAME,P.COMPANY_NAME FROM PPP_CY C LEFT JOIN APP_USER A ON C.USER_ID=A.ID LEFT JOIN COMPANY P ON A.COMPANY_ID=P.ID 
+      WHERE  C.PROJECT_ID=#{PID} ORDER BY C.BID_DATE DESC
+       <if test="pageSize!=null and start!=null">
+			limit #{start},#{pageSize}
+	   </if> 
+	</select> 
+<!-- PPP参与表相关信息结束-->	
+
+<!-- PPP小组成员表相关信息开始-->
+	<!--判断会员是否已经加入项目小组 -->
+	<select id="chenckIsInXz" parameterType="pd" resultType="pd">
+		select * from PPP_XZ_CY where PRO_ID = #{PID} and USER_ID=#{USER_ID} 
+	</select>
+<!-- PPP小组成员表相关信息结束-->    
+</mapper>

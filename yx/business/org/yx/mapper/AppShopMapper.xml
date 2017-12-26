@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppShopMapper">
+	<!--根据用code查询店铺信息（登录处用） -->
+	<select id="findShopByUserId" parameterType="pd" resultType="pd">
+		select a.*,b.PHONE from s_app_shop a
+		INNER JOIN s_app_user b 
+		on a.USER_ID=b.EMPLOYEECODE
+		where a.STATUS ='00' and a.USER_ID=#{userId}
+	</select>
+	
+	<!-- 查询店铺信息 -->
+	<select id="findDetail" parameterType="pd" resultType="pd">
+		select
+		a.ID,
+		b.USERNAME,
+		b.NICKNAME,
+		a.SHOP_NAME,
+		a.SHOP_DESC,
+		a.SHOP_THEME,
+		a.SHOP_PORTRALT
+		from
+		s_app_shop a inner join s_app_user b on a.USER_ID=b.EMPLOYEECODE  where a.STATUS ='00' and a.USER_ID=#{USER_ID}
+	</select>
+	<!-- 查询店铺名称 -->
+	<select id="findShopName" parameterType="pd" resultType="pd">
+		select
+		SHOP_NAME
+		from
+		s_app_shop where STATUS ='00' and ID=#{ID}
+	</select>
+	<!-- 查询店铺简介 -->
+	<select id="findShopDesc" parameterType="pd" resultType="pd">
+		select
+		SHOP_DESC
+		from
+		s_app_shop where STATUS ='00' and ID=#{ID}
+	</select>
+	<!-- 查询店铺主题-->
+	<select id="findShopTheme" parameterType="pd" resultType="pd">
+		select
+		SHOP_THEME
+		from
+		s_app_shop where STATUS ='00' and ID=#{ID}
+	</select>
+	<!-- 查询店铺头像-->
+	<select id="findShopPortralt" parameterType="pd" resultType="pd">
+		select
+		SHOP_PORTRALT
+		from
+		s_app_shop where STATUS ='00' and ID=#{ID}
+	</select>
+	<!-- 新增店铺信息 -->
+	<insert id="save" parameterType="pd">
+		insert into s_app_shop(
+			ID,
+			USER_ID,
+			SHOP_NAME,
+			SHOP_DESC,
+			SHOP_THEME,
+			SHOP_PORTRALT,
+			CREATE_DATE
+
+		) values (
+			#{ID},
+			#{USER_ID},
+			#{SHOP_NAME},
+			#{SHOP_DESC},
+			#{SHOP_THEME},
+			#{SHOP_PORTRALT},
+			NOW()
+		)
+	</insert>
+
+	<!-- 修改店铺mingc-->
+	<update id="editShopName" parameterType="pd">
+		update s_app_shop 
+		set 
+		 	 SHOP_NAME=#{SHOP_NAME}
+		WHERE ID=#{ID}
+	</update>
+	<!-- 修改店铺简介-->
+	<update id="editShopDesc" parameterType="pd">
+		update s_app_shop 
+		set 
+		 	 SHOP_DESC=#{SHOP_DESC}
+		WHERE ID=#{ID}
+	</update>
+	
+	<!-- 修改店铺主题-->
+	<update id="editShopTheme" parameterType="pd">
+		update s_app_shop 
+		set 
+		 	 SHOP_THEME=#{SHOP_THEME}
+		WHERE ID=#{ID}
+	</update>
+	
+	<!-- 修改店铺头像-->
+	<update id="editShopPortral" parameterType="pd">
+		update s_app_shop 
+		set 
+		 	 SHOP_PORTRALT=#{SHOP_PORTRALT}
+		WHERE ID=#{ID}
+	</update>
+	
+	<!-- 查询店铺指南 -->
+	<select id="findShopGuide" parameterType="pd" resultType="pd">
+		SELECT ID,TITLE,CONTENT from s_app_shop_guide where CODE=#{CODE}
+	</select>
+	
+	<!-- 查询店铺指南列表 -->
+	<select id="findShopGuideList" parameterType="pd" resultType="pd">
+		SELECT * FROM (SELECT ID,TITLE,PARENT_ID,ORDER_BY FROM s_app_column WHERE PARENT_ID='0' ORDER BY ORDER_BY ASC) a 
+		union all 
+		SELECT * FROM(SELECT ID,TITLE,PARENT_ID,ORDER_BY FROM s_app_column WHERE PARENT_ID!='0' ORDER BY ORDER_BY ASC) b
+	</select>
+
+	<!-- 查询分享次数 -->
+	<select id="findShareCount" parameterType="pd" resultType="pd">
+		select sum(TIMES) as TIMES,TYPE from s_app_share where USER_ID=#{USER_ID} 
+		<if test="CREATEDATE != null and CREATEDATE != ''">
+			and <![CDATA[DATE >= #{CREATEDATE}]]>
+		</if>
+		<if test="ENDDATE != null and ENDDATE != ''">
+			and <![CDATA[DATE <= #{ENDDATE}]]>
+		</if>
+		
+		GROUP BY TYPE 
+	</select>
+	
+	<!-- 查询浏览次数 -->
+	<select id="findViewCount" parameterType="pd" resultType="pd">
+		select ID, SEVEN_TJ,THIRTY_TJ,NINTY_TJ,QUANBU_TJ from s_app_view_tj where USER_ID=#{USER_ID} and DATE=#{DATE}
+	</select>
+	
+	
+	<!-- 添加分享次数 -->
+	<insert id="addShare" parameterType="pd">
+		insert into s_app_share_journal(
+			ID,
+			USER_ID,
+			DATE,
+			TYPE
+		)values(
+			#{ID},
+			#{USER_ID},
+			#{DATE},
+			#{TYPE}
+		)
+	</insert>
+	
+	<!-- 验证店铺名称是否存在 -->
+	<select id="checkShopName" parameterType="pd" resultType="pd">
+		select SHOP_NAME from s_app_shop where SHOP_NAME=#{SHOP_NAME} and STATUS='00'
+	</select>
+
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppDicMapper">
+    <!-- 查询所有字典表的信息 -->
+	<select id="queryAll" resultType="pd" >
+	   SELECT A.ZD_ID AS ID,A.BIANMA AS P_BIANMA,B.BIANMA AS BIANMA,B.NAME AS NAME
+       FROM (SELECT ZD_ID,BIANMA,NAME,PARENT_ID,ORDY_BY FROM SYS_DICTIONARIES WHERE PARENT_ID='0') A 
+       LEFT JOIN SYS_DICTIONARIES B ON A.ZD_ID=B.PARENT_ID ORDER BY A.BIANMA ASC,B.ORDY_BY ASC
+	</select> 
+	
+	<select id="queryByPBM" parameterType="String" resultType="pd" >
+		SELECT ZD_ID,NAME,BIANMA,ORDY_BY,PARENT_ID,P_BM,BIANMA AS id FROM  SYS_DICTIONARIES
+		WHERE PARENT_ID =(SELECT ZD_ID FROM  SYS_DICTIONARIES
+		WHERE BIANMA=#{BIANMA}) ORDER BY ORDY_BY ASC
+	</select>  
+	
+	<select id="queryByBM" parameterType="String" resultType="pd" >
+		SELECT NAME as text,BIANMA as value FROM  SYS_DICTIONARIES
+		WHERE PARENT_ID =(SELECT ZD_ID FROM  SYS_DICTIONARIES
+		WHERE BIANMA=#{BIANMA}) ORDER BY ORDY_BY ASC
+	</select> 
+	
+	<select id="queryBM" parameterType="String" resultType="pd" >
+		SELECT BIANMA as value,NAME as text FROM  SYS_DICTIONARIES
+		WHERE PARENT_ID =(SELECT ZD_ID FROM  SYS_DICTIONARIES
+		WHERE BIANMA=#{BIANMA})
+	</select> 
+
+	<select id="listAllParentDict" resultType="pd">
+		SELECT * FROM  SYS_DICTIONARIES
+		WHERE PARENT_ID = '0' ORDER BY ORDY_BY
+	</select>
+	
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd">
+		UPDATE  SYS_DICTIONARIES
+			SET NAME    = #{NAME},
+				ORDY_BY = #{ORDY_BY},
+				BIANMA  = #{BIANMA},
+				P_BM	  = #{P_BM}
+			WHERE 
+				ZD_ID = #{ZD_ID}
+	</update> 
+	
+	<!-- 通过id获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		SELECT  
+			a.ZD_ID,
+			a.NAME,
+			a.BIANMA,
+			a.ORDY_BY,
+			a.PARENT_ID,
+			a.P_BM,
+      (SELECT P_BM FROM SYS_DICTIONARIES WHERE ZD_ID = a.PARENT_ID) PP_BM
+		FROM  
+			SYS_DICTIONARIES a
+		WHERE 
+			<if test="ZD_ID != null and ZD_ID != ''">
+				a.ZD_ID = #{ZD_ID}
+			</if> 
+	</select> 
+	
+	<!-- 列表 -->
+	<select id="dictlistPage" parameterType="page" resultType="pd">
+		SELECT  z1.ZD_ID,
+				z1.NAME,
+				z1.BIANMA,
+				z1.ORDY_BY,
+				z1.PARENT_ID, 
+				z1.P_BM,
+				z2.NAME PNAME
+		FROM  SYS_DICTIONARIES z1
+		left join
+			SYS_DICTIONARIES z2 
+		on  z1.PARENT_ID = z2.ZD_ID 
+		WHERE 
+		    1 = 1
+		<if test="pd.PARENT_ID != null and pd.PARENT_ID != ''">
+			and z1.PARENT_ID = #{pd.PARENT_ID}
+		</if>
+		<if test="pd.NAME != null and pd.NAME != ''">
+			and z1.NAME LIKE CONCAT(CONCAT('%', #{pd.NAME}),'%') 
+		</if> 
+	</select>
+	
+		<!-- 查询总数 -->
+	<select id="findCountByParam" parameterType="page" resultType="pd">
+		SELECT 
+			count(*) counts
+		FROM SYS_DICTIONARIES z1
+		left join
+			SYS_DICTIONARIES z2 
+		on  z1.PARENT_ID = z2.ZD_ID 
+		WHERE 
+		    1 = 1
+		<if test="pd.PARENT_ID != null and pd.PARENT_ID != ''">
+			and z1.PARENT_ID = #{pd.PARENT_ID}
+		</if>
+		<if test="pd.NAME != null and pd.NAME != ''">
+			and z1.NAME LIKE CONCAT(CONCAT('%', #{pd.NAME}),'%') 
+		</if> 
+	</select>
+	
+	<!-- 列表 -->
+	<select id="dictlist" parameterType="pd" resultType="pd">
+		SELECT  z1.ZD_ID,
+				z1.NAME,
+				z1.BIANMA,
+				z1.ORDY_BY,
+				z1.PARENT_ID, 
+				z1.P_BM,
+				z2.NAME PNAME
+		FROM SYS_DICTIONARIES z1
+		left join
+			SYS_DICTIONARIES z2 
+		on  z1.PARENT_ID = z2.ZD_ID 
+		WHERE 
+		    z1.PARENT_ID = #{PARENT_ID}
+		<if test="NAME != null and NAME != ''">
+			and z1.NAME LIKE CONCAT(CONCAT('%', #{NAME}),'%') 
+		</if>
+		ORDER BY  z1.ORDY_BY
+	</select> 
+	
+	<!-- 查询总数 -->
+	<select id="findCount" parameterType="pd" resultType="pd">
+		SELECT  
+			count(ZD_ID) ZS
+		FROM 
+			SYS_DICTIONARIES
+		WHERE 
+			PARENT_ID = #{PARENT_ID}
+	</select>
+	
+	<!-- 查询某编码 -->
+	<select id="findBmCount" parameterType="pd" resultType="pd">
+		SELECT  
+			ZD_ID
+		FROM 
+			SYS_DICTIONARIES
+		WHERE 
+			BIANMA = #{BIANMA}
+		<if test="ZD_ID != null and ZD_ID != ''">
+			and ZD_ID != #{ZD_ID} 
+		</if>
+	</select>
+	
+	<!-- 根据编码查询记录 -->
+	<select id="findByBianma" parameterType="pd" resultType="pd">
+		SELECT  * FROM SYS_DICTIONARIES WHERE BIANMA = #{BIANMA} 
+	</select>
+	
+	<!-- 根据父编码找子编码列表 -->
+	<select id="findByPbm" parameterType="pd" resultType="pd">
+		SELECT   d.ZD_ID,
+				d.NAME,
+				d.BIANMA,
+				d.ORDY_BY,
+				d.PARENT_ID, 
+				d.P_BM
+		FROM SYS_DICTIONARIES d 
+		WHERE  1=1
+		<if test="P_BM != null and P_BM != ''">
+			and P_BM LIKE CONCAT(CONCAT('%', #{P_BM}),'%')
+		</if>  
+	</select> 
+</mapper>

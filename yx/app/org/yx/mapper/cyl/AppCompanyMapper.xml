@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppCompanyMapper"> 
+	
+	<!--根据行业查询公司列表信息--> 
+	<select id="queryByParam" resultType="pd" parameterType="pd">
+	  SELECT A.ID,A.REAL_NAME,A.IMG,A.IS_VIP,A.VIP_LEVEL,S.NAME AS LEVEL_NAME,C.ID AS COMPANY_ID,C.COMPANY_NAME 
+	  FROM JL_CHAIN_COMPANY J LEFT JOIN  COMPANY C ON J.COMPANY_ID=C.ID LEFT JOIN APP_USER  A  ON A.COMPANY_ID=C.ID LEFT JOIN SYS_DICTIONARIES S ON A.VIP_LEVEL=S.BIANMA 
+		WHERE A.IS_VIP!='3' AND A.IS_VIP!='2' AND C.ISDEL=1
+	    <if test="COMPANY_NAME !=null  and COMPANY_NAME!=''">	
+			and C.COMPANY_NAME LIKE CONCAT(CONCAT('%', #{COMPANY_NAME}),'%')
+		</if>
+	    <if test="CATEGORY_ID !=null and CATEGORY_ID!=''">	
+			and C.CATEGORY_ID=#{CATEGORY_ID} 
+		</if> 
+	   ORDER BY A.IS_VIP DESC,A.VIP_LEVEL DESC 
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	 
+	<!--公司详情信息--> 
+	<select id="queryById" resultType="pd" parameterType="pd"> 
+	SELECT C.ID,C.COMPANY_NAME,C.ENGLISH_NAME,C.ADDR,C.CATEGORY_ID,C.COMPANY_PROPERTY,C.LOGO,C.DESCRIPTION,C.INTERNET_PATH,C.FOUND_TIME,C.BUSINESS_SCOPE,
+		C.DEVELOPE_HISTORY,C.PRIMARY_SERVICE,C.BUSINESS_SULTURE,C.FOUNDER,C.STAFFS_NUMBER,A.VIP_LEVEL,S.NAME AS LEVEL_NAME,G.NAME AS CATE_NAME,C.COVER_PATH
+		FROM COMPANY C LEFT JOIN APP_USER A ON C.ID=A.COMPANY_ID LEFT JOIN SYS_DICTIONARIES S ON A.VIP_LEVEL=S.BIANMA LEFT JOIN CATEGORY G ON C.CATEGORY_ID=G.ID 
+		WHERE C.ID=#{COMPANY_ID}
+	</select>  
+	
+	<!--查询公司荣誉信息--> 
+	<select id="queryHonors" resultType="pd" parameterType="pd"> 
+	    SELECT H.HONOR,H.GET_TIME FROM COMPANY_HONOR H WHERE H.COMPANY_ID=#{COMPANY_ID} ORDER BY H.GET_TIME  
+	</select>  
+	
+	<!-- 根据USER_ID查询公司信息 -->
+	<select id="queryComById" parameterType="pd" resultType="pd">
+	    SELECT C.* FROM APP_USER A LEFT JOIN COMPANY C ON A.COMPANY_ID=C.ID where A.ID=#{USER_ID}
+	</select>
+</mapper>

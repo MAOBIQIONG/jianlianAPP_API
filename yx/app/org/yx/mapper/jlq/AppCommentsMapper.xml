@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppCommentsMapper"> 
+
+	<!-- 获取媒体的评论信息-分页 -->
+    <select id="queryPageByParam" parameterType="pd" resultType="pd">
+   		 SELECT C.*,A.REAL_NAME AS REAL_NAME,A.IMG AS USER_IMG FROM COMMENTS C LEFT JOIN APP_USER A ON C.USER_ID=A.ID  
+   		 WHERE C.MEDIA_ID=#{MEDIA_ID} ORDER BY C.COMMENT_DATE DESC   
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+    
+	<!-- 添加评论 -->
+	<insert id="save" parameterType="pd">
+		INSERT INTO COMMENTS(ID,USER_ID,MEDIA_ID,CONTENT,COMMENT_DATE,ANSWER_ID,IDENTIFICATION)
+		values(#{ID},#{USER_ID},#{MEDIA_ID},#{CONTENT},#{COMMENT_DATE},#{ANSWER_ID},#{IDENTIFICATION})  
+    </insert>
+    
+    <!-- 查询当前评论是第几条 -->
+    <select id="queryCounts" parameterType="pd" resultType="pd">
+		SELECT count(*) AS counts FROM comments WHERE MEDIA_ID=#{MEDIA_ID}
+	</select>  
+</mapper>

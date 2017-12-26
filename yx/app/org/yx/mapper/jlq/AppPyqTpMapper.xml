@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppPyqTpMapper"> 
+
+	<!-- 获取对应朋友圈信息的图片-->
+    <select id="queryByParam" parameterType="pd" resultType="pd">
+   		SELECT * FROM JL_PYQ_TP  WHERE RELATED_ID=#{ID} AND ISDEL=1 ORDER BY ORDER_BY ASC
+	</select>    
+    
+	<!-- 添加朋友圈图片-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_PYQ_TP(ID,IMG_PATH,RELATED_ID,ORDER_BY,IMG_H,IMG_W)
+		values(#{ID},#{IMG_PATH},#{RELATED_ID},#{ORDER_BY},#{IMG_H},#{IMG_W})  
+    </insert>
+    
+    <!--删除朋友圈信息-->
+	<delete id="del" parameterType="pd">
+		delete from JL_PYQ_TP where RELATED_ID=#{PYQ_ID}
+	</delete>  
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppHuiDaMapper">
+
+	<!-- 查询某个问题的回答列表信息-分页 -->
+	<select id="queryPageByParam" parameterType="pd" resultType="pd"> 
+        SELECT H.*,W.TITLE,A.ID AS USER_ID,A.IMG AS USER_IMG,A.REAL_NAME FROM JL_HD H LEFT JOIN APP_USER A ON H.USER_ID=A.ID 
+        LEFT JOIN JL_WT W ON W.ID=H.WT_ID WHERE 1=1
+        <if test="WT_ID !=null">	
+			and H.WT_ID=#{WT_ID}
+		</if> 
+        <if test="USER_ID !=null">	
+			and H.USER_ID = #{USER_ID}
+		</if>
+        ORDER BY H.DATE DESC 
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+ 
+	<!-- 查询回答详情信息-->
+	<select id="queryById" parameterType="pd" resultType="pd">
+		SELECT H.*,A.ID AS USER_ID,A.IMG AS USER_IMG,A.REAL_NAME, W.TITLE FROM JL_HD H LEFT JOIN APP_USER A ON H.USER_ID=A.ID LEFT JOIN JL_WT W ON H.WT_ID=W.ID WHERE H.ID = #{HD_ID}
+	</select>  
+	
+	<!-- 添加回答-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_HD(ID,WT_ID,USER_ID,CONTENT,DATE) values (#{ID},#{WT_ID},#{USER_ID},#{CONTENT},#{DATE})  
+    </insert>  
+</mapper>

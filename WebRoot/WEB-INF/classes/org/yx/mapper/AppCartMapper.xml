@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppCartMapper">
+
+	<!-- 查询购物车列表 -->
+	<select id="findCartList" parameterType="pd" resultType="pd">
+		select 
+     		c.ID,
+			c.ATTRBUTE,
+			c.PROD_NUM,
+		    (select PRICE from s_app_product_sku where PROD_ID=c.PROD_NO and SKU_INFO=c.SKU_INFO) PRICE,
+		    (select STOCK_N from s_app_product_sku where PROD_ID=c.PROD_NO and SKU_INFO=c.SKU_INFO) STOCK_N,
+			(select SALE_N from s_app_product_sku where PROD_ID=c.PROD_NO and SKU_INFO=c.SKU_INFO) SALE_N,
+		    p.PROD_NAME,
+		    p.ID as PRODUCT_ID,
+		    (SELECT IMG_PATH from s_app_product_img where ORDERBY='1' AND PRODUCT_ID=p.ID ) IMG_PATH,
+		    (SELECT SHOP_NAME from s_app_shop where ID=c.SHOP_ID ) SHOP_NAME,
+		    p.PROD_NO as PROD_NO,
+		    p.EXPRESS_PRICE as EXPRESS_PRICE,
+		    c.SKU_INFO
+			from s_app_cart c 
+			INNER JOIN s_app_product p 
+		    on c.PROD_NO=p.PROD_NO
+		where c.USER_ID=#{USER_ID}
+		ORDER BY c.CREATE_DATE desc
+	</select>
+	
+	<!-- 查询购物车商品总数 -->
+	<select id="findCount" parameterType="pd" resultType="pd">
+		select 
+     		 count(ID) ZS
+			from s_app_cart 
+		where USER_ID=#{USER_ID}
+	</select>
+	
+	
+	<!-- 查询商品是否已加入购物车 -->
+	<select id="findIsProd" parameterType="pd" resultType="pd">
+		select *
+			from s_app_cart where USER_ID=#{USER_ID}
+		    AND PROD_NO=#{PROD_NO} AND SKU_INFO=#{SKU_INFO}
+	</select>
+	
+	
+	
+	<!-- 新增购物车信息 -->
+	<insert id="saveCart" parameterType="pd">
+		insert into s_app_cart(
+			ID,
+			USER_ID,
+			PROD_NO,
+			ATTRBUTE,
+			PROD_NUM,
+			SKU_INFO,
+			SHOP_ID,
+			CREATE_DATE
+		) values (
+			#{ID},
+			#{USER_ID},
+			#{PROD_NO},
+			#{ATTRBUTE},
+			#{PROD_NUM},
+			#{SKU_INFO},
+			#{SHOP_ID},
+			NOW()
+		)
+	</insert>
+	
+	
+	<!--修改购物车的信息-->
+	<update id="editCart" parameterType="pd">
+		update s_app_cart 
+			<trim prefix="set" suffixOverrides=",">
+				<if test="PROD_NUM!=null and PROD_NUM!=''">
+					PROD_NUM=#{PROD_NUM},
+				</if>
+				<if test="ATTRBUTE!=null and ATTRBUTE!=''">
+					ATTRBUTE=#{ATTRBUTE},
+				</if>
+				<if test="SKU_INFO!=null and SKU_INFO!=''">
+					SKU_INFO=#{SKU_INFO}
+				</if>
+			</trim>
+			where ID=#{ID} 
+	</update>
+	<!--修改购物车的信息 -->
+	<update id="editCart1" parameterType="pd">
+		update s_app_cart 
+			<trim prefix="set" suffixOverrides=",">
+				<if test="PROD_NUM!=null and PROD_NUM!=''">
+					PROD_NUM=PROD_NUM+#{PROD_NUM},
+				</if>
+				<if test="ATTRBUTE!=null and ATTRBUTE!=''">
+					ATTRBUTE=#{ATTRBUTE},
+				</if>
+				<if test="SKU_INFO!=null and SKU_INFO!=''">
+					SKU_INFO=#{SKU_INFO}
+				</if>
+			</trim>
+			where ID=#{ID} 
+	</update>
+	
+	<!--删除购物车-->
+	<update id="deleteCart" parameterType="pd">
+		delete from s_app_cart where ID=#{ID}
+	</update>
+</mapper>

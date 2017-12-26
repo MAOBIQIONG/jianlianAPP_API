@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppUserMapper">
+
+	<sql id="userCoumln">
+		<trim suffix="" suffixOverrides=",">
+			<if test="ID!=null and ID!=''">
+				ID,
+			</if>
+			<if test="username!=null and username!=''">
+				USERNAME,
+			</if>
+			<if test="nikeName!=null and nikeName!=''">
+				NICKNAME,
+			</if>
+			<if test="ProvinceName!=null and ProvinceName!=''">
+				PROVINCENAME,
+			</if>
+			<if test="CityName!=null and CityName!=''">
+				CITYNAME,
+			</if>
+			<if test="DutyName!=null and DutyName!=''">
+				DUTYNAME,
+			</if>
+			<if test="PositionName!=null and PositionName!=''">
+				POSITIONNAME,
+			</if>
+			<if test="EmployeeCode!=null and EmployeeCode!=''">
+				EMPLOYEECODE,
+			</if>
+			<if test="sex!=null and sex!=''">
+				SEX,
+			</if>
+			<if test="level!=null and level!=''">
+				LEVEL,
+			</if>
+			<if test="totalScore!=null and totalScore!=''">
+				TOTAL_SCORE,
+			</if>
+			<if test="monScore!=null and monScore!=''">
+				MON_SCORE,
+			</if>
+			<if test="imgPath!=null and imgPath!=''">
+				IMG_PATH,
+			</if>
+			<if test="mobile!=null and mobile!=''">
+				PHONE,
+			</if>
+			<if test="region!=null and region!=''">
+				REGION,
+			</if>
+			<if test="subRegion!=null and subRegion!=''">
+				SUB_REGION,
+			</if>
+			<if test="employeePositionName!=null and employeePositionName!=''">
+				EMPLOYEE_POSITION_NAME,
+			</if>
+			<if test="Status!=null and Status!=''">
+				JOB_STATUS,
+			</if>
+			<if test="needPass!=null and needPass!=''">
+				NEED_PASS,
+			</if>
+			<if test="EntryDateStr!=null and EntryDateStr!=''">
+				ENROLL_TIME,
+			</if>
+			<if test="LeaveDateStr!=null and LeaveDateStr!=''">
+				OFFBOARD_TIME,
+			</if>
+			<if test="Company!=null and Company!=''">
+				COMPANY,
+			</if>
+			<if test="cityLevel!=null and cityLevel!=''">
+				CITY_LEVEL,
+			</if>
+			<if test="StoreCode!=null and StoreCode!=''">
+				STORE_CODE,
+			</if>
+			<if test="StoreName!=null and StoreName!=''">
+				STORE_NAME,
+			</if>
+			<if test="ClientType!=null and ClientType!=''">
+				CLIENT_TYPE,
+			</if>
+			<if test="ASCode!=null and ASCode!=''">
+				ASCODE,
+			</if>
+			<if test="AECode!=null and AECode!=''">
+				AECODE,
+			</if>
+			<if test="ThreepCity!=null and ThreepCity!=''">
+				THREEP_CITY,
+			</if>
+		</trim>
+	</sql>
+	<sql id="userValue">
+		<trim suffix="" suffixOverrides=",">
+			<if test="ID!=null and ID!=''">
+				#{ID},
+			</if>
+			<if test="username!=null and username!=''">
+				#{username},
+			</if>
+			<if test="nikeName!=null and nikeName!=''">
+				#{nikeName},
+			</if>
+			<if test="ProvinceName!=null and ProvinceName!=''">
+				#{ProvinceName},
+			</if>
+			<if test="CityName!=null and CityName!=''">
+				#{CityName},
+			</if>
+			<if test="DutyName!=null and DutyName!=''">
+				#{DutyName},
+			</if>
+			<if test="PositionName!=null and PositionName!=''">
+				#{PositionName},
+			</if>
+			<if test="EmployeeCode!=null and EmployeeCode!=''">
+				#{EmployeeCode},
+			</if>
+			<if test="sex!=null and sex!=''">
+				#{sex},
+			</if>
+			<if test="level!=null and level!=''">
+				#{level},
+			</if>
+			<if test="totalScore!=null and totalScore!=''">
+				#{totalScore},
+			</if>
+			<if test="monScore!=null and monScore!=''">
+				#{monScore},
+			</if>
+			<if test="imgPath!=null and imgPath!=''">
+				#{imgPath},
+			</if>
+			<if test="mobile!=null and mobile!=''">
+				#{mobile},
+			</if>
+			<if test="region!=null and region!=''">
+				#{region},
+			</if>
+			<if test="subRegion!=null and subRegion!=''">
+				#{subRegion},
+			</if>
+			<if test="employeePositionName!=null and employeePositionName!=''">
+				#{employeePositionName},
+			</if>
+			<if test="Status!=null and Status!=''">
+				#{Status},
+			</if>
+			<if test="needPass!=null and needPass!=''">
+				#{needPass},
+			</if>
+			<if test="EntryDateStr!=null and EntryDateStr!=''">
+				#{EntryDateStr},
+			</if>
+			<if test="LeaveDateStr!=null and LeaveDateStr!=''">
+				#{LeaveDateStr},
+			</if>
+			<if test="Company!=null and Company!=''">
+				#{Company},
+			</if>
+			<if test="cityLevel!=null and cityLevel!=''">
+				#{cityLevel},
+			</if>
+			<if test="StoreCode!=null and StoreCode!=''">
+				#{StoreCode},
+			</if>
+			<if test="StoreName!=null and StoreName!=''">
+				#{StoreName},
+			</if>
+			<if test="ClientType!=null and ClientType!=''">
+				#{ClientType},
+			</if>
+			<if test="ASCode!=null and ASCode!=''">
+				#{ASCode},
+			</if>
+			<if test="AECode!=null and AECode!=''">
+				#{AECode},
+			</if>
+			<if test="ThreepCity!=null and ThreepCity!=''">
+				#{ThreepCity},
+			</if>
+		</trim>
+	</sql>
+	<!-- 用户添加 -->
+	<insert id="saveUser" parameterType="pd">
+		insert into s_app_user(
+			<include refid="userCoumln"></include>
+		)values(
+			<include refid="userValue"></include>
+		)
+	</insert>
+	
+	<!-- 更新用户信息 -->
+	<update id="updateUser" parameterType="pd">
+		update s_app_user
+			<trim prefix="set" suffixOverrides=",">
+				<if test="username!=null and username!=''">
+					USERNAME=#{username},
+				</if>
+				<if test="nikeName!=null and nikeName!=''">
+					NICKNAME=#{nikeName},
+				</if>
+				<if test="ProvinceName!=null and ProvinceName!=''">
+					PROVINCENAME=#{ProvinceName},
+				</if>
+				<if test="CityName!=null and CityName!=''">
+					CITYNAME=#{CityName},
+				</if>
+				<if test="DutyName!=null and DutyName!=''">
+					DUTYNAME=#{DutyName},
+				</if>
+				<if test="PositionName!=null and PositionName!=''">
+					POSITIONNAME=#{PositionName},
+				</if>
+				<if test="EmployeeCode!=null and EmployeeCode!=''">
+					EMPLOYEECODE=#{EmployeeCode},
+				</if>
+				<if test="sex!=null and sex!=''">
+					SEX=#{sex},
+				</if>
+				<if test="level!=null and level!=''">
+					LEVEL=#{level},
+				</if>
+				<if test="totalScore!=null and totalScore!=''">
+					TOTAL_SCORE=#{totalScore},
+				</if>
+				<if test="monScore!=null and monScore!=''">
+					MON_SCORE=#{monScore},
+				</if>
+				<if test="imgPath!=null and imgPath!=''">
+					IMG_PATH=#{imgPath},
+				</if>
+				<if test="mobile!=null and mobile!=''">
+					PHONE=#{mobile},
+				</if>
+				<if test="region!=null and region!=''">
+					REGION=#{region},
+				</if>
+				<if test="subRegion!=null and subRegion!=''">
+					SUB_REGION=#{subRegion},
+				</if>
+				<if test="employeePositionName!=null and employeePositionName!=''">
+					EMPLOYEE_POSITION_NAME=#{employeePositionName},
+				</if>
+				<if test="Status!=null and Status!=''">
+					JOB_STATUS=#{Status},
+				</if>
+				<if test="needPass!=null and needPass!=''">
+					NEED_PASS=#{needPass},
+				</if>
+				<if test="EntryDateStr!=null and EntryDateStr!=''">
+					ENROLL_TIME=#{EntryDateStr},
+				</if>
+				<if test="LeaveDateStr!=null and LeaveDateStr!=''">
+					OFFBOARD_TIME=#{LeaveDateStr},
+				</if>
+				<if test="Company!=null and Company!=''">
+					COMPANY=#{Company},
+				</if>
+				<if test="cityLevel!=null and cityLevel!=''">
+					CITY_LEVEL=#{cityLevel},
+				</if>
+				<if test="StoreCode!=null and StoreCode!=''">
+					STORE_CODE=#{StoreCode},
+				</if>
+				<if test="StoreName!=null and StoreName!=''">
+					STORE_NAME=#{StoreName},
+				</if>
+				<if test="ClientType!=null and ClientType!=''">
+					CLIENT_TYPE=#{ClientType},
+				</if>
+				<if test="ASCode!=null and ASCode!=''">
+					ASCODE=#{ASCode},
+				</if>
+				<if test="AECode!=null and AECode!=''">
+					AECODE=#{AECode},
+				</if>
+				<if test="ThreepCity!=null and ThreepCity!=''">
+					THREEP_CITY=#{ThreepCity},
+				</if>
+			</trim>
+			where EMPLOYEECODE=#{EmployeeCode}
+	</update>
+	
+	<!-- 根据用户code查询用户信息 -->
+	<select id="findUserByCode" parameterType="pd" resultType="pd">
+		select * from s_app_user where EMPLOYEECODE=#{EmployeeCode}
+	</select>
+	
+	<!-- 查询用户收货地址列表 -->
+	<select id="findUserAddressList" parameterType="pd" resultType="pd">
+		select
+			ID,SHOP_USERNAME,SHOP_PHONE,SHOP_AREA,SHOP_ADDRESS,IS_DEFAULT
+		from
+		s_app_user_address where USER_ID=#{USER_ID}
+	</select>
+	
+	<!-- 查询用户默认收货收货地址 -->
+	<select id="findUserDefaultAddress" parameterType="pd" resultType="pd">
+		select
+			ID,SHOP_USERNAME,SHOP_PHONE,concat(SHOP_AREA,SHOP_ADDRESS) SHOP_ADDRESS
+		from
+		s_app_user_address where IS_DEFAULT='01' and USER_ID=#{USER_ID}
+	</select>
+	
+	<!-- 新增用户收货地址信息 -->
+	<insert id="saveAddress" parameterType="pd">
+		insert into s_app_user_address(
+			ID,
+			USER_ID,
+			SHOP_USERNAME,
+			SHOP_PHONE,
+			SHOP_AREA,
+			SHOP_ADDRESS,
+			IS_DEFAULT,
+			CREATE_DATE
+		) values (
+			#{ID},
+			#{USER_ID},
+			#{SHOP_USERNAME},
+			#{SHOP_PHONE},
+			#{SHOP_AREA},
+			#{SHOP_ADDRESS},
+			'01',
+			NOW()
+		)
+	</insert>
+	
+	
+	<!-- 编辑用户收货地址信息 -->
+	<update id="editAddress" parameterType="pd">
+		update s_app_user_address
+			set
+			SHOP_USERNAME=#{SHOP_USERNAME},
+			SHOP_PHONE=#{SHOP_PHONE},
+			SHOP_AREA=#{SHOP_AREA},
+			SHOP_ADDRESS=#{SHOP_ADDRESS}
+		where ID=#{ID}
+	</update>
+	
+	
+	<!--修改用户默认地址为非默认-->
+	<update id="editAddressis" parameterType="pd">
+		update s_app_user_address set IS_DEFAULT='00' where IS_DEFAULT='01' and USER_ID=#{USER_ID}
+	</update>
+	
+	<!--设置默认地址-->
+	<update id="editIsdefault" parameterType="pd">
+		update s_app_user_address set IS_DEFAULT='01'  where ID=#{ID} and USER_ID=#{USER_ID}
+	</update>
+	
+	<!--设置支付密码-->
+	<update id="editPass" parameterType="pd">
+		update s_app_user set PAY_PASSWPRD=#{PAY_PASSWORD} where EMPLOYEECODE=#{USER_ID}
+	</update>
+	
+	
+	<!--删除地址-->
+	<delete id="delAddress" parameterType="pd">
+		delete from s_app_user_address where ID=#{ID}
+	</delete>
+</mapper>

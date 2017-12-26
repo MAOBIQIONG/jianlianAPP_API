@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppSxyMapper">
+	<!--列表 -->
+	<select id="queryBylist" resultType="pd" parameterType="pd">
+		SELECT ID,TITLE,COVER_PATH,VIEW_COUNT FROM JL_JLB_SXY 
+		WHERE ISDEL=1 AND TYPE=#{TYPE} AND STATUS=01
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	
+	<!--详情 -->
+	<select id="querySxyDetails" resultType="pd" parameterType="pd">
+		SELECT JJS.ID,JJS.TITLE,JJS.PUBLISH_DATE,JJS.CONETENT,JJS.LIKE_COUNT,JJS.COMMENT_COUNT 
+		FROM jl_jlb_sxy JJS 
+		WHERE JJS.ID=#{ID}
+	</select>
+	
+	<!--查询教授 -->
+	<select id="queryByjs" resultType="pd" parameterType="pd">
+		SELECT SJ.ID,SJ.PRO_NAME,SJ.PRO_TITLE,SJ.PRO_IMG,PRO_DETAILS_IMG 
+		FROM JL_JLB_SXY JJS 
+		LEFT JOIN JL_JLB_SXY_JS_GL JG ON JJS.ID=JG.SXY_ID 
+		LEFT JOIN JL_JLB_SXY_JS SJ ON SJ.ID=JG.PRO_ID
+		WHERE JJS.ISDEL=1 AND JG.SXY_ID=#{ID}
+	</select>
+	
+	<!--查询评论 -->
+	<select id="queryBypl" resultType="pd" parameterType="pd">
+		SELECT PL.ID,AU.ID AS USER_ID,AU.REAL_NAME,AU.IMG AS USER_IMG,PL.CONTENT,PL.COMMENT_DATE 
+		FROM jl_jlb_sxy_pl PL 
+		LEFT JOIN app_user AU ON PL.USER_ID=AU.ID 
+		WHERE PL.ISDEL=1 AND PL.SXY_ID=#{ID}
+		ORDER by COMMENT_DATE  
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	
+	
+	<!-- 修改文章的分享、评论、查看、点赞、收藏增加次数 -->
+	<update id="updateCounts" parameterType="pd">
+		UPDATE JL_JLB_SXY SET 
+		<if test="COMMENT_COUNT != null and COMMENT_COUNT !=''">
+		   COMMENT_COUNT=COMMENT_COUNT+1,
+		</if> 
+		<if test="SHARE_COUNT != null and SHARE_COUNT !=''">
+		   SHARE_COUNT=SHARE_COUNT+1,
+		</if>
+		<if test="VIEW_COUNT != null and VIEW_COUNT !=''">
+		   VIEW_COUNT=VIEW_COUNT+1,
+		</if>
+		<if test="LIKE_COUNT != null and LIKE_COUNT !=''">
+		   LIKE_COUNT=LIKE_COUNT+1,
+		</if>
+		<if test="COLLECT_COUNT != null and COLLECT_COUNT !=''">
+		   COLLECT_COUNT=COLLECT_COUNT+1,
+		</if>
+		ID=#{ID} WHERE ID=#{ID}
+    </update> 
+	
+	<!-- 修改文章的分享、评论、查看、点赞、收藏增加次数 -->
+	<update id="dwdateCounts" parameterType="pd">
+		UPDATE JL_JLB_SXY SET 
+		<if test="COMMENT_COUNT != null and COMMENT_COUNT !=''">
+		   COMMENT_COUNT=COMMENT_COUNT-1,
+		</if> 
+		<if test="SHARE_COUNT != null and SHARE_COUNT !=''">
+		   SHARE_COUNT=SHARE_COUNT-1,
+		</if>
+		<if test="VIEW_COUNT != null and VIEW_COUNT !=''">
+		   VIEW_COUNT=VIEW_COUNT-1,
+		</if>
+		<if test="LIKE_COUNT != null and LIKE_COUNT !=''">
+		   LIKE_COUNT=LIKE_COUNT-1,
+		</if>
+		<if test="COLLECT_COUNT != null and COLLECT_COUNT !=''">
+		   COLLECT_COUNT=COLLECT_COUNT-1,
+		</if>
+		ID=#{ID} WHERE ID=#{ID}
+    </update> 
+	
+	<!-- 新增-->
+	<insert id="save" parameterType="pd">
+		insert into JL_JLB_SXY(
+		<if test="TITLE != null">
+			TITLE,
+		</if>
+		<if test="COVER_PATH != null">
+			COVER_PATH,
+		</if>
+		<if test="COMMENT_COUNT != null">
+			COMMENT_COUNT,
+		</if>
+		<if test="CONETENT != null">
+			CONETENT,
+		</if>
+		<if test="SHARE_COUNT != null">
+			SHARE_COUNT,
+		</if>
+		<if test="TYPE != null">
+			TYPE,
+		</if>
+		<if test="LIKE_COUNT != null">
+			LIKE_COUNT,
+		</if>
+		<if test="COLLECT_COUNT != null">
+			COLLECT_COUNT,
+		</if>
+		<if test="CREATE_BY != null">
+			CREATE_BY,
+		</if>
+		<if test="CREATE_DATE != null">
+			CREATE_DATE,
+		</if>
+		<if test="STATUS != null">
+			STATUS,
+		</if>
+		<if test="PUBLISH_DATE != null">
+			PUBLISH_DATE,
+		</if>
+		<if test="IS_TOP != null">
+			IS_TOP,
+		</if>
+		<if test="VIEW_COUNT != null">
+			VIEW_COUNT,
+		</if>
+			ID
+		) values (
+		<if test="TITLE != null">
+			#{TITLE},
+		</if>
+		<if test="COVER_PATH != null">
+			#{COVER_PATH},
+		</if>
+		<if test="COMMENT_COUNT != null">
+			#{COMMENT_COUNT},
+		</if>
+		<if test="CONETENT != null">
+			#{CONETENT},
+		</if>
+		<if test="SHARE_COUNT != null">
+			#{SHARE_COUNT},
+		</if>
+		<if test="TYPE != null">
+			#{TYPE},
+		</if>
+		<if test="LIKE_COUNT != null">
+			#{LIKE_COUNT},
+		</if>
+		<if test="COLLECT_COUNT != null">
+			#{COLLECT_COUNT},
+		</if>
+		<if test="CREATE_BY != null">
+			#{CREATE_BY},
+		</if>
+		<if test="CREATE_DATE != null">
+			#{CREATE_DATE},
+		</if>
+		<if test="STATUS != null">
+			#{STATUS},
+		</if>
+		<if test="PUBLISH_DATE != null">
+			#{PUBLISH_DATE},
+		</if>
+		<if test="IS_TOP != null">
+			#{IS_TOP},
+		</if>
+		<if test="VIEW_COUNT != null">
+			#{VIEW_COUNT},
+		</if>
+			#{ID}
+		) 
+	</insert> 
+	
+	
+	<!-- 查询当前评论是第几条 -->
+    <select id="queryCounts" parameterType="pd" resultType="pd">
+		SELECT count(*) AS counts FROM JL_JLB_SXY_PL WHERE SXY_ID=#{ID} AND ISDEL=1
+	</select> 
+	
+	
+	<!-- 新增评论-->
+	<insert id="plsave" parameterType="pd">
+		insert into JL_JLB_SXY_PL(
+		<if test="USER_ID != null">
+			USER_ID,
+		</if>
+		<if test="SXY_ID != null">
+			SXY_ID,
+		</if>
+		<if test="CONTENT != null">
+			CONTENT,
+		</if>
+		<if test="COMMENT_DATE != null">
+			COMMENT_DATE,
+		</if>
+			ID
+		) values (
+		<if test="USER_ID != null">
+			#{USER_ID},
+		</if>
+		<if test="SXY_ID != null">
+			#{SXY_ID},
+		</if>
+		<if test="CONTENT != null">
+			#{CONTENT},
+		</if>
+		<if test="COMMENT_DATE != null">
+			#{COMMENT_DATE},
+		</if>
+			#{ID}
+		) 
+	</insert> 
+	
+	<!-- 教授列表 -->
+	<select id="queryProfessors" resultType="pd" parameterType="pd">
+		SELECT SXY.ID,JS.PRO_NAME,JS.PRO_TITLE,JS.PRO_IMG,JS.PRO_DETAILS_IMG FROM JL_JLB_SXY_JS JS 
+		LEFT JOIN JL_JLB_SXY_JS_GL GL ON JS.ID=GL.PRO_ID 
+		LEFT JOIN JL_JLB_SXY SXY ON SXY.ID=GL.SXY_ID
+		WHERE SXY.ID=#{ID} AND JS.ISDEL=1
+		ORDER by JS.CREATE_DATE
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	
+	<!-- 查询之前是否已经点赞-->
+    <select id="checkDz" parameterType="pd" resultType="pd">
+   		SELECT * FROM JL_JLB_SXY_DZ  WHERE USER_ID=#{USER_ID} AND SXY_ID=#{ID}
+	</select>
+	
+	<!-- 添加点赞 -->
+	<insert id="dzsave" parameterType="pd">
+		INSERT INTO JL_JLB_SXY_DZ(ID,USER_ID,SXY_ID,DATE) 
+		values(#{ID},#{USER_ID},#{SXY_ID},#{DATE})  
+    </insert> 
+    
+    <!-- 取消点赞 -->
+	 <delete id="del" parameterType="pd">
+		delete from JL_JLB_SXY_DZ WHERE USER_ID=#{USER_ID} AND SXY_ID=#{ID}
+	 </delete>
+</mapper>

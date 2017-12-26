@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProductCommentMapper"> 
+	
+	<!--根据商品信息查询评论列表信息--> 
+	<select id="queryByParam" resultType="pd" parameterType="pd">
+	  	SELECT C.*,A.REAL_NAME,A.ID AS USER_ID,A.IMG AS USER_IMG,D.PROD_SKUINFO  FROM JL_DP_PRODUCT_COMMENT C 
+	 	LEFT JOIN APP_USER A ON C.USER_ID=A.ID LEFT JOIN JL_DP_ORDER O ON C.ORDER_ID=O.ID LEFT JOIN JL_DP_ORDER_DETAIL D 
+	 	ON O.ORDER_NO=D.ORDER_NO  WHERE C.PRODUCT_ID=#{PROD_ID} 
+	 	<if test="HAS_IMG!=null and HAS_IMG!=''">
+	 	    AND C.HAS_IMG = #{HAS_IMG}
+		</if>
+	 	ORDER BY C.CREATE_DATE DESC  
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+	
+	<!--根据行业\店铺名称等查询店铺列表信息--> 
+	<select id="queryNewComment" resultType="pd" parameterType="pd">
+		   SELECT C.ID AS COM_ID,C.CONTENT,A.REAL_NAME,A.ID AS USER_ID,A.IMG AS USER_IMG,D.PROD_SKUINFO  FROM JL_DP_PRODUCT_COMMENT C 
+	 LEFT JOIN APP_USER A ON C.USER_ID=A.ID LEFT JOIN JL_DP_ORDER O ON C.ORDER_ID=O.ID LEFT JOIN JL_DP_ORDER_DETAIL D 
+	 ON O.ORDER_NO=D.ORDER_NO  WHERE C.PRODUCT_ID=#{PROD_ID} ORDER BY C.CREATE_DATE DESC LIMIT 0,1
+	</select>  
+	
+	<!--根据产品id查询评论总数--> 
+	<select id="queryCount" resultType="pd" parameterType="pd">
+		SELECT count(*) counts  FROM JL_DP_PRODUCT_COMMENT C WHERE C.PRODUCT_ID=#{PROD_ID}
+	</select>  
+	
+	<!--根据产品id查询带有图片的评论总数--> 
+	<select id="queryImgCount" resultType="pd" parameterType="pd">
+		SELECT count(*) counts  FROM JL_DP_PRODUCT_COMMENT C WHERE C.PRODUCT_ID=#{PROD_ID} and HAS_IMG='01'
+	</select>  
+	
+	<!--查询评论的图片--> 
+	<select id="queryCommImgs" resultType="pd" parameterType="pd"> 
+		SELECT T.* FROM JL_DP_COMMENT_TP T WHERE T.COMMENT_ID=#{ID} 
+	 	ORDER BY T.ORDER_BY ASC  
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>  
+	
+	<!-- 添加评论-->
+	<insert id="save" parameterType="pd"> 
+		INSERT INTO JL_DP_PRODUCT_COMMENT(ID,PRODUCT_ID,ORDER_ID,USER_ID,TYPE,CONTENT,SERVICE_SAME,DES_SAME,PLATFORM_SERVICE,HAS_IMG,CREATE_DATE) 
+		values(#{ID},#{PRODUCT_ID},#{ORDER_ID},#{USER_ID},#{TYPE},#{CONTENT},#{SERVICE_SAME},#{DES_SAME},#{PLATFORM_SERVICE},#{HAS_IMG},#{CREATE_DATE})  
+    </insert>  
+    
+    <!-- 添加评论图片-->
+	<insert id="saveImgs" parameterType="pd">  
+		INSERT INTO JL_DP_COMMENT_TP(ID,COMMENT_ID,IMG_PATH,ORDER_BY,CREATE_DATE) 
+		values(#{ID},#{COMMENT_ID},#{IMG_PATH},#{ORDER_BY},#{CREATE_DATE})  
+    </insert>  
+</mapper>

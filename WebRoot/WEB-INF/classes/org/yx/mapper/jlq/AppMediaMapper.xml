@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppMediaMapper">
+
+    <!-- 根据分类获取媒体信息 -->
+	<select id="queryByCategory" parameterType="pd" resultType="pd">
+		SELECT M.* FROM JL_APP_MEDIA M LEFT JOIN media_title_category  T ON M.COLUMN_ID=T.ID 
+		WHERE T.LOCATION_NO_ID=#{LOCATION_NO} AND M.ISDEL=1 AND M.STATUS='02' AND T.IS_SHOW=1 AND T.ISDEL=1 ORDER BY M.PUBLISH_DATE  DESC LIMIT 0,3
+	</select> 
+	
+	<!-- 获取媒体列表信息-分页 -->
+    <select id="queryPageByParam" parameterType="pd" resultType="pd">
+		   SELECT ID,TITLE,SUMMARY,IMGS,RESOURCE,VIEW_COUNT,PUBLISH_DATE FROM jl_app_media WHERE ISDEL=1 AND STATUS='02' 
+		<if test="ID !=null and ID !=''">
+			and ID = #{ID}
+		</if>
+		<if test="TITLE !=null and TITLE !=''">
+		    and TITLE = #{TITLE}
+		</if>
+		<if test="USER_ID !=null and USER_ID!=''">	
+			and USER_ID = #{USER_ID}
+		</if>
+		<if test="PUBLISH_DATE !=null and PUBLISH_DATE!=''">	
+			and PUBLISH_DATE =#{PUBLISH_DATE}
+		</if>
+		<if test="IMGS !=null">	
+			and IMGS =#{IMGS}
+		</if>
+		<if test="TYPE_ID !=null">	
+			and TYPE_ID=#{TYPE_ID}
+		</if>
+		<if test="CONETENT !=null">	
+			and CONETENT =#{CONETENT}
+		</if>
+		<if test="LINK_URL !=null">	
+			and LINK_URL =#{LINK_URL}
+		</if>
+		<if test="RESOURCE !=null">	
+			and RESOURCE = #{RESOURCE}
+		</if>
+		<if test="COMMENT_COUNT !=null">	
+			and COMMENT_COUNT =#{COMMENT_COUNT}
+		</if>
+		<if test="COLLECT_COUNT !=null">	
+			and COLLECT_COUNT =#{COLLECT_COUNT}
+		</if>
+		<if test="SHARE_COUNT !=null">	
+			and SHARE_COUNT=#{SHARE_COUNT}
+		</if>
+		<if test="COLUMN_ID !=null">	
+			and COLUMN_ID =#{COLUMN_ID}
+		</if> 
+		<if test="IS_RECOMMEND !=null">	
+			and IS_RECOMMEND =#{IS_RECOMMEND}
+		</if>
+		<if test="IS_TOP !=null">	
+			and IS_TOP=#{IS_TOP}
+		</if> 
+		<if test="VIEW_COUNT !=null">	
+			and VIEW_COUNT=#{VIEW_COUNT}
+		</if>  
+		<if test="MORS !=null">	
+			and MORS=#{MORS}
+		</if> 
+         ORDER by IS_TOP DESC,PUBLISH_DATE desc  
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>   
+	 
+	<!-- 媒体首页id新闻 -->
+  	<select id="queryById" parameterType="pd" resultType="pd">
+    	SELECT M.ID,M.TITLE,M.PUBLISH_DATE,M.CONETENT,M.COMMENT_COUNT,M.RESOURCE,M.VIDEOS,U.NAME AS NAME FROM JL_APP_MEDIA M LEFT JOIN sys_user U ON M.CREATE_BY=U.ID WHERE M.ID=#{MEDIA_ID} AND M.ISDEL=1
+  	</select> 
+	 
+	<!-- 修改新闻的分享、评论增加次数 -->
+	<update id="updateCounts" parameterType="pd">
+		UPDATE jl_app_media SET 
+		<if test="COMMENT_COUNT != null and COMMENT_COUNT !=''">
+		   COMMENT_COUNT=COMMENT_COUNT+1,
+		</if> 
+		<if test="SHARE_COUNT != null and SHARE_COUNT !=''">
+		   SHARE_COUNT=SHARE_COUNT+1,
+		</if>
+		<if test="VIEW_COUNT != null and VIEW_COUNT !=''">
+		   VIEW_COUNT=VIEW_COUNT+1,
+		</if>
+		ID=#{MEDIA_ID} WHERE ID=#{MEDIA_ID}
+    </update> 
+    
+    <!-- 媒体分类获取 -->
+	<select id="queryHot" resultType="pd">
+		SELECT M.ID,M.TITLE,M.SUMMARY,'MED' AS TABLE_NAME FROM jl_app_media M LEFT JOIN media_title_category C ON M.COLUMN_ID=C.ID  AND C.LOCATION_NO_ID='02_00' 
+		WHERE M.ISDEL=1 AND M.STATUS='02' AND C.IS_SHOW=1 ORDER BY PUBLISH_DATE DESC LIMIT 0,5
+	</select>
+
+	<!-- 根据标题模糊查询 -->
+	<select id="queryMedByTitle" parameterType="pd" resultType="pd">
+    	SELECT m.ID,m.TITLE,m.CONETENT,m.TYPE_ID from JL_APP_MEDIA m 
+    	where m.ISDEL=1 AND m.STATUS='02'
+    	 <if test="TITLE != null and TITLE !=''">
+		   AND m.TITLE LIKE CONCAT(CONCAT('%', #{TITLE}),'%') 
+		</if>     
+	</select> 
+	
+	<!-- 添加分享 -->
+	<insert id="addShare" parameterType="pd">
+		INSERT INTO SHARES(ID,USER_ID,MEDIA_ID,SHARE_DATE,SHARE_TARGET)
+		values(#{ID},#{USER_ID},#{MEDIA_ID},#{SHARE_DATE},#{SHARE_TARGET})  
+    </insert> 
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+

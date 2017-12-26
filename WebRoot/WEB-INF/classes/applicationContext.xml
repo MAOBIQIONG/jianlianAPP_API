@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	 xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+		   http://www.springframework.org/schema/mvc 
+		   http://www.springframework.org/schema/mvc/spring-mvc.xsd	
+           http://www.springframework.org/schema/aop   
+           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd  
+           http://www.springframework.org/schema/tx  
+           http://www.springframework.org/schema/tx/spring-tx-3.0.xsd  
+           http://www.springframework.org/schema/cache
+           http://www.springframework.org/schema/cache/spring-cache.xsd
+           http://www.springframework.org/schema/context  
+           http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	<!--auto scan -->
+	<mvc:annotation-driven />
+	<mvc:default-servlet-handler />
+	
+	<context:annotation-config />
+	
+	<!-- 缓存 属性 -->
+	<bean id="cacheManagerFactory"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:ehcache.xml" />
+	</bean>
+		
+	
+	<!-- 默认是cacheManager -->
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+		<property name="cacheManager" ref="cacheManagerFactory" />
+	</bean>
+
+	<!-- 支持缓存注解 -->
+	<cache:annotation-driven cache-manager="cacheManager" />
+	
+	<!-- 扫描 -->
+	<context:component-scan base-package="org.yx.*" />
+	
+	<!-- 对静态资源文件的访问 restful -->
+	<mvc:resources mapping="/HPLUS/**" location="/,/HPLUS/" />
+	
+	<!-- 访问拦截 -->
+	<!-- <mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**/**" />
+			<bean class="org.yx.common.interceptor.LoginHandlerInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors> -->
+	
+	<!-- 配置数据源druid -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+		<property name="url" value="${jdbc_url}"/>
+		<property name="username" value="${jdbc_username}"/>
+		<property name="password" value="${jdbc_password}"/>
+		<!-- init params-->
+	    <property name="initialSize" value="1" />      <!-- 初始化大小 -->
+	    <property name="minIdle" value="1" />   	   <!-- 最小-->
+	    <property name="maxActive" value="20" /> 	   <!-- 最大-->
+	     <!-- 配置获取连接等待超时的时间 -->  
+    	<property name="maxWait" value="60000" />  
+	    <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->  
+	    <property name="timeBetweenEvictionRunsMillis" value="60000" />  
+	    <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->  
+	    <property name="minEvictableIdleTimeMillis" value="300000" />  	    
+	    <property name="validationQuery" value="SELECT 'x'" />  
+	    <property name="testWhileIdle" value="true" />  
+	    <property name="testOnBorrow" value="false" />  
+	    <property name="testOnReturn" value="false" />  	   
+	    <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->  
+	    <property name="poolPreparedStatements" value="true" />  
+	    <property name="maxPoolPreparedStatementPerConnectionSize" value="20" />  	   
+	    <!-- 配置监控统计拦截的filters，去掉后监控界面sql无法统计 -->  
+	    <property name="filters" value="stat" /> 
+	</bean>
+	<!-- 加载  jdbc.properties 属性文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	<!--scan -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="org.yx.*" />
+	</bean>
+	<!--继承自AuthorizingRealm的自定义Realm 指定自定义relam-->
+	<!-- <bean id="myRealm" class="org.yx.common.shiro.MyRelam"/> -->
+	<!-- 配置shiro Realm 设置单个Relam应用-->
+	<!-- <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+	   <property name="realm" ref="myRealm"/>
+	</bean> -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+	   <property name="realm" ref="ShiroRealm"/>
+	</bean>
+	<!-- 自定义,使用基于url路径表达式,进行权限控制 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- 配置security 属性 -->
+		<property name="securityManager" ref="securityManager"/>
+		<!-- 默认login 页面,默认为 webRoot根目录下-->
+		<property name="loginUrl" value="/login_toLogin" />
+		<!-- 登录成功后的页面 ,授权成功后跳转的页面,默认为登录controller的地址-->
+	    <property name="successUrl" value="/main/index" />
+	    <!-- 未授权时访问的界面 -->
+	    <property name="unauthorizedUrl" value="/noacess"></property>
+	    <!-- anon：它对应的过滤器里面是空的,什么都没做,这里.do和.jsp后面的*表示参数,比方说login.jsp?main这种 -->  
+        <!-- authc：该过滤器下的页面必须验证后才能访问,它是Shiro内置的一个拦截器org.apache.shiro.web.filter.authc.FormAuthenticationFilter -->  
+        <property name="filterChainDefinitions">  
+            <value>  
+                /index/** = anon
+				/plugins/** = anon
+				/static/** = anon
+				/app**/** = anon
+				/H-ui/** = anon
+				/code = anon
+				/login** = anon
+				/**/** = anon
+            </value>  
+        </property>  
+	</bean>
+	<!-- 保证实现了shiro 内部的lifecyle 函数的bean执行 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"></bean>
+
+	<!-- 事务处理 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean name="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- 获取Spring上下文 -->
+	<bean id="springContextHolder" class="spring.SpringContextHolder" />
+
+	<!-- 配置mybatis -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis/mybatis-config.xml"></property>
+		<!-- mapper扫描 -->
+		<property name="mapperLocations" value="classpath:org/yx/mapper/**/*.xml"></property>
+	</bean>
+
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="appurl" class="org.yx.util.AppUrl">
+		<!-- 不用验证参数直接进入 -->
+		<property name="permitted">
+			<list>
+				
+			</list>
+		</property>
+	</bean>
+</beans>

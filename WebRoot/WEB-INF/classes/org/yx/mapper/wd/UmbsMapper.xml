@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UmbsMapper">
+	
+	<!-- 查询 -->
+	<select id="listPage" parameterType="page" resultType="pd">
+		select * from (
+			select a.ID,a.STATUS,
+				b.REAL_NAME,
+				b.PHONE,
+				b.POSITION,
+				(SELECT NAME FROM SYS_DICTIONARIES WHERE 
+							CONCAT('viptype_',b.VIP_LEVEL) = P_BM) LEVELNAME,
+				(SELECT NAME FROM SYS_DICTIONARIES WHERE 
+							CONCAT('viptype_',a.UPGRADE_LEVEL) = P_BM) SJLEVELNAME,
+				DATE_FORMAT(a.CREATE_DATE,'%Y-%m-%d %H:%i:%s') as DATE,
+				(select COMPANY_NAME from company where ID=b.COMPANY_ID and ISDEL='1') 
+				COMPANY_NAME, 
+				DATE_FORMAT(a.AUDIT_DATE,'%Y-%m-%d %H:%i:%s') as AUDIT_DATE,
+	      		(select NAME from sys_user WHERE ID = a.AUDIT_BY) SYSNAME
+			from JL_UPGRADE a 
+			LEFT JOIN APP_USER b on a.USER_ID=b.ID
+		) a
+		where 1=1
+		<if test="pd.STATUS != '' and pd.STATUS!= ''">
+			and a.STATUS=#{pd.STATUS}
+		</if>
+		<if test="pd.NAME != '' and pd.NAME!= ''">
+			and a.REAL_NAME LIKE  CONCAT(CONCAT('%', #{pd.NAME}), '%')
+		</if>
+		<if test="pd.GSNAME != '' and pd.GSNAME!= ''">
+			and a.COMPANY_NAME LIKE  CONCAT(CONCAT('%', #{pd.GSNAME}), '%')
+		</if>
+		
+	</select> 
+	<!-- 查询条数 -->
+	<select id="findCount" parameterType="page" resultType="pd">
+		select COUNT(a.ID) ZS from(
+			select * from (
+				select a.ID,a.STATUS,
+					b.REAL_NAME,
+					b.PHONE,
+					b.POSITION,
+					(SELECT NAME FROM SYS_DICTIONARIES WHERE 
+								CONCAT('viptype_',b.VIP_LEVEL) = P_BM) LEVELNAME,
+					(SELECT NAME FROM SYS_DICTIONARIES WHERE 
+								CONCAT('viptype_',a.UPGRADE_LEVEL) = P_BM) SJLEVELNAME,
+					DATE_FORMAT(a.CREATE_DATE,'%Y-%m-%d %H:%i:%s') as DATE,
+					(select COMPANY_NAME from company where ID=b.COMPANY_ID and ISDEL='1') 
+					COMPANY_NAME, 
+					DATE_FORMAT(a.AUDIT_DATE,'%Y-%m-%d %H:%i:%s') as AUDIT_DATE,
+		      		(select NAME from sys_user WHERE ID = a.AUDIT_BY) SYSNAME
+				from JL_UPGRADE a 
+				LEFT JOIN APP_USER b on a.USER_ID=b.ID
+			) a
+			where 1=1
+			<if test="pd.STATUS != '' and pd.STATUS!= ''">
+				and a.STATUS=#{pd.STATUS}
+			</if>
+			<if test="pd.NAME != '' and pd.NAME!= ''">
+				and a.REAL_NAME LIKE  CONCAT(CONCAT('%', #{pd.NAME}), '%')
+			</if>
+			<if test="pd.GSNAME != '' and pd.GSNAME!= ''">
+				and a.COMPANY_NAME LIKE  CONCAT(CONCAT('%', #{pd.GSNAME}), '%')
+			</if>
+		) a
+	</select> 
+	<select id="queryById" resultType="pd">
+	   select a.ID,a.STATUS,
+			b.REAL_NAME,
+			b.PHONE,
+			b.POSITION,
+			a.USER_ID,
+			(SELECT NAME FROM SYS_DICTIONARIES WHERE 
+						CONCAT('viptype_',b.VIP_LEVEL) = P_BM) LEVELNAME,
+			(SELECT NAME FROM SYS_DICTIONARIES WHERE 
+						CONCAT('viptype_',a.UPGRADE_LEVEL) = P_BM) SJLEVELNAME,
+			DATE_FORMAT(a.CREATE_DATE,'%Y-%m-%d %H:%i:%s') as DATE,
+			(select COMPANY_NAME from company where ID=b.COMPANY_ID and ISDEL='1') 
+			COMPANY_NAME, 
+			DATE_FORMAT(a.AUDIT_DATE,'%Y-%m-%d %H:%i:%s') as AUDIT_DATE,
+      (select NAME from sys_user WHERE ID = a.AUDIT_BY) SYSNAME,
+      a.PRICE_TOPAY,
+			a.NOPASS_REASON
+		from JL_UPGRADE a 
+		LEFT JOIN APP_USER b on a.USER_ID=b.ID WHERE a.ID=#{ID}
+	</select> 
+	<update id="shtg" parameterType="pd">
+		UPDATE JL_UPGRADE SET STATUS='03',ORDER_ID=#{ORDER_ID},AUDIT_BY=#{AUDIT_BY},AUDIT_DATE=NOW() WHERE ID=#{ID}
+	</update>
+	<update id="shjj" parameterType="pd">
+		UPDATE JL_UPGRADE SET NOPASS_REASON=#{NOPASS_REASON},STATUS='02',AUDIT_BY=#{AUDIT_BY},AUDIT_DATE=NOW() WHERE ID=#{ID}
+	</update>
+	
+	<!-- 新增用户消息信息-->
+	<insert id="saveUserMsg" parameterType="pd">
+	    INSERT into sys_notification(ID,CONTENT,USER_ID,CREATE_DATE,TABLE_NAME,STATUS,OBJECT_ID) 
+	    VALUE(#{ID},#{CONTENT},#{USER_ID},#{CREATE_DATE},#{TABLE_NAME},#{STATUS},#{OBJECT_ID})
+	</insert>
+	
+	<!-- 新增用户升级入会订单信息-->
+	<insert id="saveOrder" parameterType="pd">
+	    INSERT into orders(ID,USER_ID,PRICE,DATE,EVENT,STATUS,TYPE,OBJECT_ID) 
+	    VALUE(#{ID},#{USER_ID},#{PRICE},#{DATE},#{EVENT},#{STATUS},#{TYPE},#{OBJECT_ID})
+	</insert>
+	
+	<!-- 根据userid查询升级入会订单 -->
+	<select id="queryByUid" parameterType="page" resultType="pd">
+		select * from orders where ISDEL='1' and TYPE =#{TYPE} and USER_ID=#{USER_ID}
+	</select>
+	
+	<update id="editOrder" parameterType="pd">
+		UPDATE orders SET ISDEL=#{ISDEL} WHERE USER_ID=#{USER_ID} AND TYPE = #{TYPE}
+	</update>
+	
+	<!--查询审核数据系统信息  -->
+	<select id="queryXx" resultType="pd">
+		select * from sys_notification 
+		where ISDEL='1' and 
+		OBJECT_ID=#{OBJECT_ID}
+	</select>
+	
+	<update id="editXx" parameterType="pd">
+		UPDATE sys_notification SET CONTENT=#{CONTENT},STATUS='01',IS_READ='0',CREATE_DATE=NOW() WHERE ID=#{ID}
+	</update>
+	
+	<!-- 查询支付成功，并且升级入会、续费的订单 -->
+	<select id="queryRhordd" resultType="pd">
+		SELECT * FROM orders WHERE TYPE in(01,03) AND STATUS=03 AND USER_ID=#{USER_ID}
+	</select>
+</mapper>

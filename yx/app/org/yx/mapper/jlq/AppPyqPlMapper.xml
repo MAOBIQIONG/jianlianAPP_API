@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppPyqPlMapper"> 
+
+	<!-- 获取朋友圈的评论信息-分页 -->
+    <select id="queryPageByParam" parameterType="pd" resultType="pd">
+   		 SELECT PL.*,A.REAL_NAME AS REAL_NAME,A.IMG AS USER_IMG FROM JL_PYQ_PL PL LEFT JOIN APP_USER A ON PL.USER_ID=A.ID  
+   		 WHERE PL.PYQ_ID=#{PYQ_ID} AND A.ISDEL=1 ORDER BY PL.COMMENT_DATE ASC   
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>    
+	<!-- 获取朋友圈的评论OR回复信息-分页 -->
+	<select id="queryPageByParamor" parameterType="pd" resultType="pd">
+   		 SELECT PL.*,A.REAL_NAME,A.IMG AS USER_IMG,ANS.ANS_ID,ANS.ANS_NAME FROM JL_PYQ_PL PL 
+		LEFT JOIN APP_USER A ON PL.USER_ID=A.ID
+		LEFT JOIN (SELECT JPL.ID,AU.ID AS ANS_ID,AU.REAL_NAME AS ANS_NAME FROM JL_PYQ_PL JPL
+		LEFT JOIN APP_USER AU ON AU.ID=JPL.USER_ID) ANS ON ANS.ID = PL.ANSWER_ID
+		WHERE PL.PYQ_ID=#{PYQ_ID} AND A.ISDEL=1 AND PL.ISDEL=1 ORDER BY PL.COMMENT_DATE ASC    
+	</select>
+	
+	<!-- 获取朋友圈的评论信息-分页 -->
+    <select id="queryPls" parameterType="pd" resultType="pd">
+   		 SELECT PL.*,A.REAL_NAME AS REAL_NAME,A.IMG AS USER_IMG FROM JL_PYQ_PL PL LEFT JOIN APP_USER A ON PL.USER_ID=A.ID  
+   		 WHERE PL.PYQ_ID=#{PYQ_ID} ORDER BY PL.COMMENT_DATE ASC limit 0,10
+	</select>    
+    
+	<!-- 添加评论 -->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_PYQ_PL(ID,USER_ID,PYQ_ID,CONTENT,COMMENT_DATE,ANSWER_ID,FLOOR,TYPE)
+		values(#{ID},#{USER_ID},#{PYQ_ID},#{CONTENT},#{COMMENT_DATE},#{ANSWER_ID},#{FLOOR},#{TYPE})  
+    </insert>
+    
+    <!-- 查询当前评论是第几条 -->
+    <select id="queryCounts" parameterType="pd" resultType="pd">
+		SELECT count(*) AS counts FROM JL_PYQ_PL WHERE PYQ_ID=#{PYQ_ID} and TYPE=0
+	</select>  
+	
+	 <!--删除评论信息-->
+	 <update id="pldel" parameterType="pd">
+		UPDATE jl_pyq_pl SET  ISDEL=2 WHERE ID=#{ID}
+    </update>  
+</mapper>

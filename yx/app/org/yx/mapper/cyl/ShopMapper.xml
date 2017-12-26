@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ShopMapper"> 
+	
+	<!--根据行业\店铺名称等查询店铺列表信息--> 
+	<select id="queryByParam" resultType="pd" parameterType="pd">
+	  SELECT A.VIP_LEVEL,A.COMPANY_ID,S.ID,S.SHOP_NAME,S.SHOP_PORTRALT,S.SHOP_THEME,G.NAME AS CATE_NAME,D.NAME AS LEVEL_NAME FROM JL_DP_SHOP S LEFT JOIN APP_USER A ON S.USER_ID=A.ID 
+ 		LEFT JOIN COMPANY C ON A.COMPANY_ID=C.ID LEFT JOIN CATEGORY G ON C.CATEGORY_ID=G.ID LEFT JOIN SYS_DICTIONARIES D ON A.VIP_LEVEL=D.BIANMA 
+ 		WHERE 1=1 
+	    <if test="SHOP_NAME !=null  and SHOP_NAME!=''">	
+			and S.SHOP_NAME LIKE CONCAT(CONCAT('%', #{SHOP_NAME}),'%')
+		</if>
+	    <if test="CATEGORY_ID !=null and CATEGORY_ID!=''">	
+			and C.CATEGORY_ID=#{CATEGORY_ID} 
+		</if> 
+	   ORDER BY A.VIP_LEVEL DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+	
+	<!--根据公司id查询店铺基本信息--> 
+	<select id="queryByComid" resultType="pd" parameterType="pd">
+	   SELECT S.*,C.LOGO,A.VIP_LEVEL,S.ID AS SHOP_ID,A.ID AS USER_ID FROM JL_DP_SHOP S LEFT JOIN APP_USER A ON S.USER_ID=A.ID 
+	   LEFT JOIN COMPANY C ON  C.ID=A.COMPANY_ID WHERE C.ID=#{COMPANY_ID}
+	</select>  
+	
+	<!--根据店铺id查询店铺基本信息--> 
+	<select id="queryById" resultType="pd" parameterType="pd">
+	   SELECT S.*,C.LOGO,A.VIP_LEVEL,A.PHONE FROM JL_DP_SHOP S LEFT JOIN APP_USER A ON S.USER_ID=A.ID 
+	   LEFT JOIN COMPANY C ON  C.ID=A.COMPANY_ID WHERE S.ID=#{SHOP_ID}
+	</select>   
+	
+	<!--查询是否已收藏该店铺--> 
+	<select id="queryIsCollect" resultType="pd" parameterType="pd">
+	   SELECT * FROM collection WHERE USER_ID =#{USER_ID} AND TYPE='JL_DP_SHOP' AND OBJECT_ID=#{SHOP_ID}
+	</select>  
+</mapper>

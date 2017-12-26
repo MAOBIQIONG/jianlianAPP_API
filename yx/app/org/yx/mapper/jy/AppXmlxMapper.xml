@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppXmlxMapper">
+    <!--根据条件查询项目类型-->
+    <select id="queryByParam" parameterType="pd" resultType="pd">
+   		SELECT * FROM JL_XM_LX l WHERE 1=1
+   		<if test="pid!=null and pid!=''">
+			and PID=#{pid}
+		</if>
+		<if test="ID!=null and ID!=''">
+			and ID=#{ID}
+		</if> 
+	</select> 
+	
+	<!--查询用户订阅的类型信息-->
+    <select id="queryDyLx" parameterType="pd" resultType="pd">
+   		SELECT L.*,D.ID AS LX_ID FROM JL_XM_LX L LEFT JOIN JL_DY_LX D ON L.ID=D.CTYPE AND D.USER_ID=#{USER_ID}  WHERE L.PID=#{pid} 
+	</select>  
+	
+	<!--查询用户订阅的所有子id-->
+    <select id="queryDyCid" parameterType="pd" resultType="pd">	 
+		select id as lxid from jl_xm_lx l where l.pid in (SELECT CTYPE FROM JL_DY_LX WHERE PTYPE='0' AND USER_ID=#{USER_ID}) or l.id in (SELECT CTYPE FROM JL_DY_LX WHERE PTYPE!='0' AND USER_ID=#{USER_ID})
+	</select> 
+	
+	<!--查询项目类型-->
+	<select id="listByPId" parameterType="String" resultType="pd">
+		SELECT ID as value,NAME as text FROM jl_xm_lx WHERE PID =#{pid}
+	</select>  
+	
+	<!--查询用户订阅的所有子名称-->
+    <select id="queryDyCname" parameterType="pd" resultType="pd">	 
+		select name from jl_xm_lx l where l.pid in (SELECT CTYPE FROM JL_DY_LX WHERE PTYPE='0' AND USER_ID=#{USER_ID}) or l.id in (SELECT CTYPE FROM JL_DY_LX WHERE PTYPE!='0' AND USER_ID=#{USER_ID})
+	</select> 
+	
+	<select id="queryNamebyId" parameterType="pd" resultType="pd">
+	 	SELECT CASE A.NAME WHEN '' THEN B.NAME ELSE A.NAME END AS NAME 
+    	FROM (SELECT PID,NAME FROM JL_XM_LX WHERE ID=#{PROJECT_TYPE_ID}) A LEFT JOIN JL_XM_LX B ON A.PID=B.ID
+	</select>
+	
+	<select id="queryAll" resultType="pd">
+		SELECT A.ID AS P_ID,A.NAME AS P_NAME,B.ID,B.NAME FROM (SELECT ID, NAME, PID,ORDER_BY FROM JL_XM_LX WHERE PID ='0') A
+ 		LEFT JOIN JL_XM_LX B ON B.PID=A.ID order by A.ORDER_BY asc ,B.ORDER_BY ASC ;
+	</select>
+</mapper>

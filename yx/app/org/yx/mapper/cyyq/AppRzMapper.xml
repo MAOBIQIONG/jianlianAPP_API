@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppRzMapper">  
+	 
+	 <!--入驻信息列表-->
+	 <select id="queryByRZlists" resultType="pd" parameterType="pd">
+	   SELECT P.ID,P.USER_ID,P.CREATE_BY,P.ENTERPRISE_NAME,P.PROJECT_NAME,P.SETTLED_TYPE,P.LOGO,P.AUDIT_DATE FROM zs_settled_park P 
+	  WHERE P.STATUS='03' AND P.ISDEL=1
+	     <if test="SETTLED_TYPE !=null and SETTLED_TYPE !=''">
+		    and P.SETTLED_TYPE =#{SETTLED_TYPE}
+		</if>
+		ORDER BY P.AUDIT_DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!--入驻信息详情-->
+	 <select id="queryByRZbyid" resultType="pd" parameterType="pd">
+	  	SELECT P.*,A.REAL_NAME,A.PHONE AS MANAGER_PHONE FROM zs_settled_park P 
+	  	LEFT JOIN APP_USER A ON P.JL_CONTACTS = A.ID 
+	  	WHERE P.ISDEL=1 AND P.ID=#{RZ_ID}
+	</select> 
+	
+	<!--查询我的入驻信息--> 
+	<select id="queryByRZlist" resultType="pd" parameterType="pd">
+	  SELECT P.ID,P.USER_ID,P.CREATE_BY,P.ENTERPRISE_NAME,P.PROJECT_NAME,P.SETTLED_TYPE,P.LOGO,P.STATUS,P.AUDIT_DATE FROM zs_settled_park P 
+	  WHERE P.USER_ID=#{USER_ID} AND P.ISDEL=1
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!-- 入驻信息填写 -->
+	<insert id="save" parameterType="pd"> 
+		INSERT INTO zs_settled_park (ID,USER_ID,SETTLED_TYPE,ENTERPRISE_NAME,ENTERPRISE_URL,ENTERPRISE_INTRODUCE,LOGO,REQUIREMENT,YQ_NAME,NATURE,PROJECT_NAME,STATUS,PHONE,CREATE_DATE) VALUES
+		(#{RZ_ID},#{USER_ID},#{SETTLED_TYPE},#{ENTERPRISE_NAME},#{ENTERPRISE_URL},#{ENTERPRISE_INTRODUCE},#{LOGO},#{REQUIREMENT},#{YQ_NAME},#{NATURE},#{PROJECT_NAME},#{STATUS},#{PHONE},#{CREATE_DATE})
+	</insert> 
+
+	<!-- 入驻信息修改 -->
+	<update id="edit" parameterType="pd">
+		update zs_settled_park set
+		<if test="USER_ID !=null and USER_ID!='' ">	
+			USER_ID=#{USER_ID},
+		</if>    
+		<if test="SETTLED_TYPE !=null and SETTLED_TYPE !='' ">
+		     SETTLED_TYPE= #{SETTLED_TYPE},
+		</if> 
+		<if test="ENTERPRISE_NAME !=null">
+			ENTERPRISE_NAME=#{ENTERPRISE_NAME} ,
+		</if>   
+		<if test="ENTERPRISE_URL !=null">
+			ENTERPRISE_URL=#{ENTERPRISE_URL} ,
+		</if> 
+		<if test="ENTERPRISE_INTRODUCE !=null">
+			ENTERPRISE_INTRODUCE=#{ENTERPRISE_INTRODUCE} ,
+		</if> 
+		<if test="REQUIREMENT !=null">
+			REQUIREMENT=#{REQUIREMENT} ,
+		</if>  
+		<if test="YQ_NAME !=null">
+			 YQ_NAME=#{YQ_NAME} ,
+		</if> 
+		<if test="LOGO !=null">
+			 LOGO=#{LOGO} ,
+		</if> 
+		<if test="NATURE !=null">
+			NATURE=#{NATURE}, 
+		</if>  
+		<if test="PROJECT_NAME !=null">
+			PROJECT_NAME=#{PROJECT_NAME} ,
+		</if> 
+		<if test="PHONE !=null">
+			PHONE=#{PHONE}, 
+		</if>   
+		<if test="STATUS !=null">
+			 STATUS=#{STATUS} ,
+		</if> 
+		<if test="MODIFY_DATE !=null">
+			MODIFY_DATE=#{MODIFY_DATE}, 
+		</if>  
+	    ID=#{RZ_ID}
+		where ID=#{RZ_ID}
+	</update>
+	
+	<!-- 删除入驻园区信息 -->
+	<update id="delete" parameterType="pd">
+		UPDATE zs_settled_park SET ISDEL=2 WHERE ID=#{RZ_ID}
+	</update>
+</mapper>

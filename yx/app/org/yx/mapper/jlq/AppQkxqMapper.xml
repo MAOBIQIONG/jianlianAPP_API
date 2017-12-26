@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppQkxqMapper"> 
+
+    <!-- 根据期刊id查询期刊的所有页数 -->
+	<select id="queryByQkid" parameterType="pd" resultType="pd">
+	   SELECT * FROM JL_QK_XQ WHERE QK_ID=#{QK_ID} ORDER BY PAGE_NUM 
+	</select> 
+</mapper>

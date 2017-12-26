@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ConversationMapper">
+	 <!-- 根据id会话 -->
+	<select id="findBycon" parameterType="pd" resultType="pd">
+		SELECT * FROM jl_conversation  
+		WHERE (USER_ID=#{USER_ID} and JSID=#{JSID} ) or (USER_ID=#{JSID} and JSID=#{USER_ID})
+	</select>  
+	
+	<!-- 新增会话-->
+	<insert id="save" parameterType="pd">
+		insert into jl_conversation(
+		<if test="USER_ID != null">
+			USER_ID,
+		</if>
+		<if test="JSID != null">
+			JSID,
+		</if>
+		<if test="PRO_ID != null">
+			PRO_ID,
+		</if>
+		<if test="CONTENT != null">
+			CONTENT,
+		</if>
+		<if test="CREATE_DATE != null">
+			CREATE_DATE,
+		</if> 
+			ID
+		) values (
+		<if test="USER_ID != null">
+			#{USER_ID},
+		</if>
+		<if test="JSID != null">
+			#{JSID},
+		</if>
+		<if test="PRO_ID != null">
+			#{PRO_ID},
+		</if>
+		<if test="CONTENT != null">
+			#{CONTENT},
+		</if>
+		<if test="CREATE_DATE != null">
+			#{CREATE_DATE},
+		</if> 
+			#{ID}
+		) 
+	</insert>
+	
+	<!-- 保存消息-->
+	<insert id="savemess" parameterType="pd">
+		insert into JL_MESSAGE(
+		<if test="USER_ID != null">
+			USER_ID,
+		</if>
+		<if test="JSID != null">
+			JSID,
+		</if>
+		<if test="CON_ID != null">
+			CON_ID,
+		</if>
+		<if test="CONTENT != null">
+			CONTENT,
+		</if>
+		<if test="CREATE_DATE != null">
+			CREATE_DATE,
+		</if> 
+		<if test="type != null">
+			type,
+		</if> 
+			ID
+		) values (
+		<if test="USER_ID != null">
+			#{USER_ID},
+		</if>
+		<if test="JSID != null">
+			#{JSID},
+		</if>
+		<if test="CON_ID != null">
+			#{CON_ID},
+		</if>
+		<if test="CONTENT != null">
+			#{CONTENT},
+		</if>
+		<if test="CREATE_DATE != null">
+			#{CREATE_DATE},
+		</if> 
+		<if test="type != null">
+			#{type},
+		</if>
+			#{ID}
+		) 
+	</insert>
+	
+	<!-- 根据id查询消息-->
+	<select id="findBymess" parameterType="pd" resultType="pd">
+		SELECT * FROM JL_MESSAGE  WHERE USER_ID=#{USER_ID} and JSID=#{JSID} 
+		ORDER BY CREATE_DATE
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!-- 查询会话列表 -->
+	<select id="queryConverlist" parameterType="pd" resultType="pd">
+		SELECT jc.ID,jc.PRO_ID,jc.CREATE_DATE,
+		pj.PROJECT_NAME,au.ID as TARGET_ID,au.REAL_NAME as TARGET_NAME,au.IMG,
+		jc.JS_UNREAD_COUNT,jc.USER_UNREAD_COUNT,jc.USER_ID,jc.JSID,jc.MODIFY_DATE,
+		jc.CONTENT,jc.SCENE,jg.TID,jg.TNAME,jg.ICON
+		FROM jl_conversation jc  
+		LEFT JOIN project pj ON jc.PRO_ID=pj.ID
+		LEFT JOIN app_user au ON (au.ID=jc.USER_ID and jc.JSID=#{USER_ID}) OR (au.ID=JC.JSID and jc.USER_ID =#{USER_ID})
+		LEFT JOIN jl_chat_group jg ON jg.TID=jc.JSID
+		WHERE (jc.USER_ID=#{USER_ID} and jc.USER_DEL=01) or (jc.JSID=#{USER_ID} and jc.JS_DEL=01) 
+		ORDER BY jc.MODIFY_DATE DESC,jc.CREATE_DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>  
+	
+	<!-- 查询消息列表 -->
+	<select id="queryMesslist" parameterType="pd" resultType="pd"> 
+		SELECT JM.*,AU.REAL_NAME,IMG FROM JL_MESSAGE JM 
+		LEFT JOIN app_user AU ON JM.USER_ID=AU.ID
+		WHERE JM.CON_ID=#{CON_ID} 
+		<if test="time!=null">
+		and JM.CREATE_DATE &lt; #{time}
+		</if> 
+		ORDER BY CREATE_DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>
+	
+	<!-- 查询群消息列表 -->
+	<select id="queryGroupMesslist" parameterType="pd" resultType="pd"> 
+		SELECT JM.*,AU.REAL_NAME,IMG FROM JL_MESSAGE JM 
+		LEFT JOIN app_user AU ON JM.USER_ID=AU.ID
+		WHERE JM.JSID=#{JSID} 
+		ORDER BY CREATE_DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>
+	
+	<!-- 修改会话 -->
+	<update id="upcon" parameterType="pd" flushCache="false">
+		update  jl_conversation set 
+		<if test="USER_ID !=null">	
+			USER_ID=#{USER_ID},	
+		</if>
+		<if test="JSID !=null">	
+			JSID=#{JSID},
+		</if>
+		<if test="PRO_ID !=null">		
+			PRO_ID=#{PRO_ID},	
+		</if>
+		<if test="USER_COUNT !=null">	
+			USER_UNREAD_COUNT=USER_UNREAD_COUNT+1,	
+		</if>
+		<if test="JS_COUNT !=null">	
+			JS_UNREAD_COUNT=JS_UNREAD_COUNT+1, 	
+		</if>
+		<if test="USER_DEL !=null">	
+			USER_DEL=#{USER_DEL},
+		</if>
+		<if test="time !=null">	
+			MODIFY_DATE=#{time},
+		</if> 
+		<if test="CONTENT !=null">	
+			CONTENT=#{CONTENT},
+		</if>
+		ID = #{ID}
+		where ID = #{ID}
+	</update>
+	
+	<!-- 修改接收人状态 -->
+	<update id="upjscon" parameterType="pd" flushCache="false">
+		update jl_conversation set  
+		<if test="USER_UNREAD_COUNT !=null">	
+			USER_UNREAD_COUNT=#{USER_UNREAD_COUNT}
+		</if> 
+		<if test="JS_UNREAD_COUNT !=null">	
+			JS_UNREAD_COUNT=#{JS_UNREAD_COUNT}
+		</if>
+		where ID = #{ID}
+	</update>
+	
+	
+	<!-- 修改用户表中的未读数 -->
+	<update id="upAppucon" parameterType="pd" flushCache="false">
+		update APP_USER set 
+		<if test="UNREAD !=null">	
+			UNREAD=UNREAD+1,	
+		</if> 
+		ID = #{UID}
+		where ID = #{UID}
+	</update>
+	
+	<select id="queryAunum" parameterType="pd" resultType="pd">
+		SELECT ID,IMG,UNREAD FROM app_user  WHERE ID=#{USER_ID}
+	</select>
+	
+	<select id="queryJsInfo" parameterType="pd" resultType="pd">
+		SELECT ID,REAL_NAME,IMG,FLAG FROM app_user  WHERE ID=#{JSID}
+	</select>
+	
+	<select id="queryGroupInfo" parameterType="pd" resultType="pd">
+		SELECT TNAME,ICON FROM jl_chat_group WHERE TID=#{JSID}
+	</select>
+	
+	<update id="upAppucons" parameterType="pd" flushCache="false">
+		update APP_USER set 
+		<if test="UNREAD !=null">	
+			UNREAD=#{UNREAD},	
+		</if> 
+		ID = #{UID}
+		where ID = #{UID}
+	</update>
+	
+	<select id="getGroupByPid" parameterType="pd" resultType="pd">
+		SELECT * FROM jl_chat_group  WHERE PRO_ID=#{PRO_ID}
+	</select>
+	
+	<select id="getGroupAndUserByPid" parameterType="pd" resultType="pd">
+		SELECT a.*,b.USER_ID FROM jl_chat_group a  
+          LEFT JOIN jl_group_user b on a.ID = b.GROUPID 
+          LEFT JOIN app_user c on b.USER_ID = c.ID 
+          WHERE a.ISDEL = '1' AND a.PRO_ID=#{PRO_ID} AND b.USER_ID = #{USER_ID}
+	</select>
+	
+	<select id="getAllFromGroup" parameterType="pd" resultType="String">
+		SELECT a.USER_ID FROM jl_group_user a 
+	    LEFT JOIN jl_chat_group b ON b.ID = a.GROUPID
+	    WHERE b.TID = #{JSID} AND a.ISDEL = 1
+	</select>
+	
+	<select id="getConIds" parameterType="pd" resultType="String">
+		SELECT ID FROM jl_conversation
+        WHERE JSID = #{JSID}
+	</select>
+	
+	<!-- 修改会话 -->
+	<update id="updConByIds" parameterType="Map">
+		update jl_conversation set 
+		<if test="time !=null">	
+			MODIFY_DATE=#{time},
+		</if> 
+		<if test="CONTENT !=null">	
+			CONTENT=#{CONTENT},
+		</if>
+		    USER_UNREAD_COUNT=USER_UNREAD_COUNT+1,	
+		    USER_DEL = '01',
+		    JS_DEL = '01'
+		where ID IN
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>  
+	</update>
+	
+	<!-- 修改用户总未读数 -->
+	<update id="updUnreadByIds" parameterType="Map">
+		update APP_USER set UNREAD=UNREAD+1
+		where ID IN
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">   
+            #{item}   
+        </foreach>  
+	</update>
+	
+	<!-- 判断身份 -->
+	<select id="getUserBySF" parameterType="pd" resultType="pd">
+		SELECT ID,MANAGER_ID,FLAG,SERVICE_TYPE FROM app_user WHERE ID =#{USER_ID}
+	</select>
+	
+	
+	<!-- 根据身份标识查询信息 -->
+	<select id="getUserBySYU" parameterType="pd" resultType="pd">
+		SELECT * FROM app_user WHERE FLAG='1' AND SERVICE_TYPE=#{SERVICE_TYPE}
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	
+	<!-- 查询出当前用户的秘书 -->
+	<select id="getUserByMS" parameterType="pd" resultType="pd">
+		SELECT AU.ID,AU.REAL_NAME,AU.IMG,CP.COMPANY_NAME FROM app_user AU 
+	    LEFT JOIN sys_user SY ON AU.USER_NAME=SY.USERNAME
+	    LEFT JOIN company CP ON CP.ID=AU.COMPANY_ID
+	    WHERE SY.ID=#{MANAGER_ID}
+	</select>
+	
+	<!-- 查询当前秘书所分配的用户 -->
+	<select id="getMsbyUser" parameterType="pd" resultType="pd">
+		SELECT AU.ID,AU.REAL_NAME,AU.IMG,CP.COMPANY_NAME FROM app_user AU 
+		LEFT JOIN company CP ON CP.ID=AU.COMPANY_ID
+		 WHERE FLAG=0
+		 <if test="MANAGER_ID !=null">		
+			and  MANAGER_ID=#{MANAGER_ID}	
+		</if> 
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	
+	<!-- 搜索用户 -->
+	<select id="getMsbyUserName" parameterType="pd" resultType="pd">
+		SELECT AU.ID,AU.REAL_NAME,AU.IMG,CP.COMPANY_NAME FROM app_user AU 
+		LEFT JOIN sys_user SY ON AU.USER_NAME=SY.USERNAME
+		LEFT JOIN company CP ON CP.ID=AU.COMPANY_ID
+		 WHERE AU.ISDEL=1
+		 <if test="FLAG !=null and FLAG !=''">	
+			and AU.FLAG=#{FLAG}
+		</if>
+		<if test="REAL_NAME !=null and REAL_NAME !=''">	
+			and AU.REAL_NAME LIKE CONCAT(CONCAT('%', #{REAL_NAME}),'%')
+		</if>
+		<if test="MANAGER_ID !=null and MANAGER_ID !=''">	
+			and AU.MANAGER_ID=#{MANAGER_ID}
+		</if>
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	
+	<!-- 存储推送所有人的消息 -->
+	<insert id="Pushsave" parameterType="pd">
+		INSERT INTO sys_notification(ID,CONTENT,USER_ID,CREATE_DATE,TABLE_NAME,OBJECT_ID,STATUS,DESCRIPTION)
+		   values (#{ID},#{CONTENT},#{USER_ID},#{CREATE_DATE},#{TABLE_NAME},#{OBJECT_ID},#{STATUS},#{DESCRIPTION})
+	</insert>  
+	
+	<!-- 查询群内所有需要通知的用户 -->
+	<select id="getOtherUser" parameterType="pd" resultType="pd">
+		SELECT A.USER_ID FROM jl_group_user A 
+        LEFT JOIN jl_chat_group B ON B.ID=A.GROUPID 
+        WHERE B.TID = #{JSID}
+	</select>
+</mapper>

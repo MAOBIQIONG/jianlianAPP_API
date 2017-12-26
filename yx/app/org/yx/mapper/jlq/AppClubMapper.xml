@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppClubMapper">
+	
+	<!-- ID                   VARCHAR(32) not null,
+   START_DATE           varchar(500),
+   END_DATE             timestamp,
+   TYPE_ID              VARCHAR(32),
+   PEOPLE_AMOUNT        INT(10),
+   LINK_MAN             VARCHAR(50),
+   LINK_PHONE           VARCHAR(30),
+   DESCRIPTION          VARCHAR(200),
+   CREATE_DATE          DATE,
+   MODIFY_BY            VARCHAR(32),
+   MODIFY_DATE          DATE,
+   STATUS               VARCHAR(2),
+   NOPASSREASON         VARCHAR(200),
+   BUDGET               numeric(10,2),
+   ISDEL                INT(2), -->
+	<!-- 通过年月获取数据某一月份的数据 -->
+	<select id="findByYearAndMonth" parameterType="pd" resultType="pd">
+		select * from club_reservation where STATUS=3 AND START_DATE LIKE CONCAT(CONCAT('%', #{START_DATE}),'%') AND ISDEL=1
+	</select>
+    
+    <!-- 添加 -->
+	<insert id="save" parameterType="pd">
+	    INSERT INTO club_reservation 
+		    (ID, START_DATE, TYPE_ID, PEOPLE_AMOUNT, LINK_MAN, 
+		     LINK_PHONE, DESCRIPTION, CREATE_DATE, STATUS, BUDGET, ISDEL,ISSYSLOOK) 
+	    VALUES 
+	        (#{ID}, #{START_DATE}, #{TYPE_ID}, #{PEOPLE_AMOUNT}, #{LINK_MAN}, 
+	         #{LINK_PHONE}, #{DESCRIPTION}, #{CREATE_DATE}, #{STATUS}, #{BUDGET}, #{ISDEL},#{ISSYSLOOK});
+	</insert>
+	
+</mapper>

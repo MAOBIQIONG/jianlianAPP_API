@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppProBidderMapper"> 
+
+    <!-- 查询某个交易的参与用户信息 -->
+	<select id="queryBidders" resultType="pd" parameterType="pd"> 
+      SELECT  A.ID,A.REAL_NAME,A.IMG,A.POSITION,A.VIP_LEVEL,A.FLAG,A.SHOW_NAME,P.COMPANY_NAME FROM PROJECT_BIDDER B LEFT JOIN  APP_USER A  ON B.USER_ID=A.ID LEFT JOIN COMPANY P ON A.COMPANY_ID=P.ID 
+      WHERE  B.PROJECT_ID=#{PRO_ID} ORDER BY B.BID_DATE DESC
+       <if test="pageSize!=null and start!=null">
+			limit #{start},#{pageSize}
+	   </if> 
+	</select>    
+ 
+	<!-- 我要参与接单 -->
+	<insert id="addbidder" parameterType="pd">
+		INSERT INTO PROJECT_BIDDER(ID,PROJECT_ID,USER_ID,BID_DATE,PHONE) VALUES(#{ID},#{PRO_ID},#{USER_ID},#{BID_DATE},#{PHONE}) 
+	</insert>
+	
+	<!-- 我要取消接单 -->
+	 <delete id="deletebidder" parameterType="pd">
+		DELETE FROM PROJECT_BIDDER WHERE PROJECT_ID=#{PRO_ID} AND USER_ID=#{USER_ID} 
+	</delete>  
+	
+	<!-- 我要取消接单 -->
+	 <delete id="canclebidder" parameterType="pd">
+		DELETE FROM PROJECT_BIDDER WHERE PROJECT_ID=#{PRO_ID} AND PHONE=#{PHONE} 
+	</delete>  
+	
+	<!--根据项目id查询参与人数 -->
+	<select id="queryTotal" parameterType="pd" resultType="pd">
+		select count(*) from PROJECT_BIDDER where PROJECT_ID = #{PRO_ID}
+	</select> 
+	
+	<!--判断会员是否已经参与项目（USER_ID） -->
+	<select id="chenckIsIn" parameterType="pd" resultType="pd">
+		select * from PROJECT_BIDDER where PROJECT_ID = #{PRO_ID} and USER_ID=#{USER_ID} 
+	</select> 
+	
+	<!--判断会员是否已经参与项目（PHONE） -->
+	<select id="chenckIsInByPhone" parameterType="pd" resultType="pd">
+		select * from PROJECT_BIDDER where PROJECT_ID = #{PRO_ID} and PHONE=#{PHONE} 
+	</select> 
+	
+	<!--根据手机号判断是否已经参与项目 -->
+	<select id="checkPhoneIsIn" parameterType="pd" resultType="pd">
+		select * from PROJECT_BIDDER where PROJECT_ID = #{PRO_ID} and PHONE=#{PHONE} and (USER_ID is null or USER_ID ='')
+	</select> 
+</mapper>

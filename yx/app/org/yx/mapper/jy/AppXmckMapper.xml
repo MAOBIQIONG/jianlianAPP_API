@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppXmckMapper">  
+	<!-- 添加查看的项目-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_XM_CK(ID,PRO_ID,USER_ID,DATE,VIEW_COUNT) values(#{ID},#{PRO_ID},#{USER_ID},#{DATE},#{VIEW_COUNT})  
+    </insert> 
+    
+    <!-- 修改查看次数数 -->
+	<update id="updateCounts" parameterType="pd">
+		UPDATE JL_XM_CK SET  
+		<if test="VIEW_COUNT != null and VIEW_COUNT !=''">
+		   VIEW_COUNT=VIEW_COUNT+1,
+		</if>   
+		PRO_ID=#{PRO_ID} WHERE PRO_ID=#{PRO_ID} and USER_ID=#{USER_ID}
+    </update>  
+    
+    <!--判断会员是否已经查看项目 -->
+	<select id="chenckIsCk" parameterType="pd" resultType="pd">
+		select * from JL_XM_CK where PRO_ID = #{PRO_ID} and USER_ID=#{USER_ID} 
+	</select>   
+	
+	 <!--查询会员查看的项目总数-->
+	<select id="queryCount" parameterType="pd" resultType="pd">
+		select count(*) as counts from JL_XM_CK where USER_ID=#{USER_ID} 
+	</select>   
+    
+    <!-- 420222196805257212 -->
+</mapper>

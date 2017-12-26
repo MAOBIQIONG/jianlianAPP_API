@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SysAreaMapper"> 
+	
+	<select id="querybyPid" parameterType="pd" resultType="pd">
+	    SELECT * FROM SYS_AREA where parentid ='0' order by areacode ASC ;
+	</select> 
+	
+	<select id="queryDybyPid" parameterType="pd" resultType="pd">
+	   select S.*,D.ID AS DQ_ID FROM  SYS_AREA S LEFT JOIN  jl_dy_dq D on S.AREACODE=D.CTYPE AND D.USER_ID=#{USER_ID} where S.PARENTID=#{pid}
+	</select>   
+	
+	<select id="listByPId" parameterType="String" resultType="pd">
+		SELECT areacode as value,areaname as text FROM SYS_AREA WHERE parentid =#{pid}
+	</select>   
+	
+	<select id="queryDyName" parameterType="pd" resultType="pd">
+	 select areaname from sys_area a where a.parentid in (SELECT CTYPE FROM JL_DY_DQ WHERE PTYPE='0' AND USER_ID=#{USER_ID} and CTYPE!='110000' and CTYPE!='120000' and CTYPE!='310000' and CTYPE!='500000') 
+	 or a.areacode in (SELECT CTYPE FROM JL_DY_DQ WHERE PTYPE!='0' AND USER_ID=#{USER_ID}) or a.areacode in (SELECT CTYPE FROM JL_DY_DQ WHERE USER_ID=#{USER_ID} and (CTYPE='110000' or CTYPE='120000' or CTYPE='310000' or CTYPE='500000'))
+	</select>  
+</mapper>

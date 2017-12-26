@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppUsersMapper"> 
+    <!-- 根据id查询会员信息 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		SELECT * FROM APP_USER WHERE ID=#{USER_ID} AND ISDEL=1
+	</select>
+	
+	 <!-- 根据服务类型查询会员信息 -->
+	<select id="queryByType" parameterType="pd" resultType="pd">
+		SELECT * FROM APP_USER WHERE SERVICE_TYPE=#{SERVICE_TYPE} AND ISDEL=1
+	</select>
+	
+	 <!-- 根据id查询会员信息 -->
+	<select id="queryByPhone" parameterType="String" resultType="pd">
+		SELECT * FROM APP_USER WHERE PHONE=#{PHONE} AND ISDEL=1
+	</select>
+	
+	<!-- 根据手机号查找用户是否已经注册 -->
+	<select id="queryUserByPhone" parameterType="pd" resultType="pd">
+		select * from APP_USER where PHONE = #{PHONE} AND ISDEL=1
+	</select>  
+	
+	<!-- 使用手机号注册 -->
+	<insert id="register" parameterType="pd">
+		INSERT INTO APP_USER(ID,REAL_NAME,PHONE,PASSWORD,VALERIE,REGISTER_DATE,LAST_LOGIN_DATE,TOTAL_POINTS,STATUS,IS_VIP,VIP_LEVEL,USER_NAME) 
+		VALUES (#{ID},#{REAL_NAME},#{PHONE},#{PASSWORD},#{VALERIE},#{REGISTER_DATE},#{LAST_LOGIN_DATE},#{TOTAL_POINTS},#{STATUS},#{IS_VIP},#{VIP_LEVEL},#{USER_NAME})
+	</insert> 
+	
+	<!-- 根据用户名或者卡号或者手机号查找信息-->
+	<select id="doCheckLogin" parameterType="pd" resultType="pd"> 
+		select A.*,A.ID as userid,C.COMPANY_NAME,C.CATEGORY_ID,C.NAME 
+		from APP_USER A 
+		LEFT JOIN (SELECT cp.*,cg.NAME FROM company cp LEFT JOIN category cg ON cp.CATEGORY_ID = cg.ID) C ON A.COMPANY_ID=C.ID 
+		LEFT JOIN clan L ON A.CLAN_ID=L.ID 
+		where (A.USER_NAME = #{USER_NAME} or A.CARD_NO=#{USER_NAME} or A.PHONE=#{USER_NAME}) AND A.ISDEL=1
+	</select>
+	
+	
+	 <!--修改密码、邮箱、手机号、修改用户印象-->
+	<update id="editPwdAndEmailAndPhone" parameterType="pd">
+		UPDATE  APP_USER SET  
+		<if test="PASSWORD !=null and PASSWORD !='' ">
+		    PASSWORD=#{PASSWORD},	
+		</if>
+		<if test="EMAIL !=null and EMAIL !='' ">
+		    EMAIL=#{EMAIL},	
+		</if>
+		<if test="PHONE !=null and PHONE !='' ">
+		    PHONE=#{PHONE},	
+		</if>
+		<if test="ASSESS !=null">
+		    ASSESS=#{ASSESS},	
+		</if>  
+		ID = #{USER_ID} WHERE ID=#{USER_ID}
+	</update>  
+	
+	<!-- 根据用户id查询公司信息-->
+	<select id="queryCompany" parameterType="pd" resultType="pd"> 
+		SELECT C.* FROM COMPANY C LEFT JOIN APP_USER A ON C.ID=A.COMPANY_ID WHERE A.ID=#{USER_ID}
+	</select> 
+	
+	 <!-- 根据id查询会员信息 -->
+	<select id="findByUId" parameterType="pd" resultType="pd">
+		SELECT A.ID,A.REAL_NAME,A.SEX,A.CLAN_ID,A.SUMMARY,A.IS_VIP,A.VIP_LEVEL,C.NAME 
+		FROM APP_USER A LEFT JOIN CLAN C ON A.CLAN_ID=C.ID WHERE A.ID=#{USER_ID} AND A.ISDEL=1
+	</select>
+	
+	<select id="queryByEmail" parameterType="pd" resultType="pd">
+		SELECT * FROM  APP_USER WHERE EMAIL= #{EMAIL} AND ISDEL=1
+	</select>
+	
+	 <!--修改公司logo-->
+	<update id="editComLogo" parameterType="pd">
+		UPDATE  COMPANY SET  
+		<if test="LOGO !=null and LOGO !='' ">
+		    LOGO=#{LOGO},	
+		</if> 
+		ID = #{COM_ID} WHERE ID=#{COM_ID}
+	</update>  
+	
+	 <!--修改密码-->
+	<update id="editPassWord" parameterType="pd" flushCache="false">
+		UPDATE  APP_USER SET  
+		<if test="PASSWORD !=null and PASSWORD !='' ">
+		    PASSWORD=#{PASSWORD},	
+		</if>
+		USER_NAME = #{USER_NAME} WHERE (USER_NAME =#{USER_NAME} OR CARD_NO =#{USER_NAME} OR PHONE = #{USER_NAME})
+	</update>
+	
+	<!--根据手机号绑定邮箱 -->
+	<update id="bindEmail" parameterType="pd">
+		UPDATE  APP_USER SET 
+		<if test="EMAIL !=null and EMAIL !='' ">
+		    EMAIL=#{EMAIL},	
+		</if> 
+		PHONE=#{PHONE}  WHERE PHONE = #{PHONE}
+	</update>
+	
+	<!-- 登录成功后修改登录时间和客户id(推送用) -->
+	<update id="updateCidAndDate" parameterType="pd">
+		UPDATE  APP_USER SET 
+		<if test="CLIENT_ID !=null and CLIENT_ID !='' ">
+		    CLIENT_ID=#{CLIENT_ID},	
+		</if>
+		<if test="PLATFORM !=null and PLATFORM !='' ">
+		    PLATFORM=#{PLATFORM},	
+		</if>
+		<if test="NICK_NAME !=null and NICK_NAME !='' ">
+		    NICK_NAME=#{NICK_NAME},	
+		</if>
+		<if test="REAL_NAME !=null and REAL_NAME !='' ">
+		    REAL_NAME=#{REAL_NAME},	
+		</if>
+		<if test="VALERIE !=null and VALERIE !='' ">
+		    VALERIE=#{VALERIE},	
+		</if> 
+		<if test="IMG !=null and IMG !='' ">
+		    IMG=#{IMG},	
+		</if>
+		LAST_LOGIN_DATE=#{LAST_LOGIN_DATE},ID = #{ID}
+			WHERE ID = #{ID}
+	</update>
+	
+	<!-- 绑定第三方信息到手机用户信息 -->
+	<update id="edit" parameterType="pd">
+		UPDATE  APP_USER SET 
+		<if test="REAL_NAME !=null and REAL_NAME !='' ">
+		    REAL_NAME=#{REAL_NAME},	
+		</if>
+		<if test="NICK_NAME !=null and NICK_NAME !='' ">
+		    NICK_NAME=#{NICK_NAME},	
+		</if>
+		<if test="POSITION !=null and POSITION !='' ">
+		    POSITION=#{POSITION},	
+		</if>
+		<if test="COMPANY_ID !=null and COMPANY_ID !='' ">
+		    COMPANY_ID=#{COMPANY_ID},	
+		</if>
+		<if test="PHONE !=null and PHONE !='' ">
+		    PHONE=#{PHONE},	
+		</if> 
+		<if test="IMG !=null and IMG !='' ">
+		    IMG=#{IMG},	
+		</if>
+		<if test="CARD_NO !=null and CARD_NO !='' ">
+		    CARD_NO=#{CARD_NO},	
+		</if>
+		<if test="SUMMARY !=null and SUMMARY !='' ">
+		    SUMMARY=#{SUMMARY},	
+		</if>
+		<if test="WEBCHAT !=null and WEBCHAT !='' ">
+		    WEBCHAT=#{WEBCHAT},	
+		</if>
+		<if test="QQ !=null and QQ !='' ">
+		    QQ=#{QQ},	
+		</if>
+		<if test="CLAN_ID !=null and CLAN_ID !='' ">
+		    CLAN_ID=#{CLAN_ID},	
+		</if>
+		 ID = #{USER_ID} WHERE ID = #{USER_ID}
+	</update>
+	
+	<!--根据用户id删除信息 -->
+	<update id="deleteUser" parameterType="pd">
+		UPDATE  APP_USER SET ISDEL='2' WHERE ID = #{USER_ID}
+	</update>
+	
+	<!-- 添加 -->
+	<insert id="adduser" parameterType="pd">
+		insert into app_user(ID,REAL_NAME,NICK_NAME,USER_NAME,PASSWORD,POSITION,COMPANY_ID,SEX,PHONE,EMAIL,IS_VIP,VIP_LEVEL,DUE_DATE,STATUS,IMG,CARD_NO,
+		REGISTER_DATE,LAST_LOGIN_DATE,SUMMARY,ASSESS,HONOR,MANAGER_ID,ID_NUMBER,NOPASSREASON,TOTAL_POINTS,WEBCHAT,QQ,WEBO,VALERIE,CLAN_ID,CLIENT_ID,PLATFORM)
+		values(#{ID},#{REAL_NAME},#{NICK_NAME},#{USER_NAME},#{PASSWORD},#{POSITION},#{COMPANY_ID},#{SEX},#{PHONE},#{EMAIL},#{IS_VIP},#{VIP_LEVEL},#{DUE_DATE},#{STATUS},#{IMG},#{CARD_NO},
+		#{REGISTER_DATE},#{LAST_LOGIN_DATE},#{SUMMARY},#{ASSESS},#{HONOR},#{MANAGER_ID},#{ID_NUMBER},#{NOPASSREASON},#{TOTAL_POINTS},#{WEBCHAT},#{QQ},#{WEBO},#{VALERIE},#{CLAN_ID},#{CLIENT_ID},#{PLATFORM})  
+    </insert>
+    
+    <!--设置融云token-->
+	<update id="editImToken" parameterType="pd" flushCache="false">
+		UPDATE  APP_USER SET IMTOKEN=#{IMTOKEN}  WHERE ID = #{ID}
+	</update>
+	
+	<!--设置网易云信token-->
+	<update id="editWyToken" parameterType="pd" flushCache="false">
+		UPDATE  APP_USER SET WYTOKEN=#{WYTOKEN}  WHERE ID = #{ID}
+	</update>
+	
+	<!-- 第三方登录成功返回信息-->
+	<select id="thirdLogin" parameterType="pd" resultType="pd"> 
+		select A.*,A.ID as userid,C.COMPANY_NAME,C.CATEGORY_ID,C.NAME 
+		from APP_USER A 
+		LEFT JOIN (SELECT cp.*,cg.NAME FROM company cp LEFT JOIN category cg ON cp.CATEGORY_ID = cg.ID) C ON A.COMPANY_ID=C.ID 
+		LEFT JOIN clan L ON A.CLAN_ID=L.ID 
+		where A.ID=#{ID} AND A.ISDEL=1
+	</select>
+	
+	<!-- 根据建联、行业查询对应等级空缺人数 -->
+	<select id="queryVacancy" parameterType="pd" resultType="pd">
+	    select * from jl_hy_zw where CLAN_ID = #{CLAN_ID} and CATEGORY_ID = #{CATEGORY_ID}
+	</select>
+	
+	<!-- 根据USER_ID查询对应等级空缺人数 -->
+	<select id="queryVacancyByUid" parameterType="pd" resultType="pd">
+	    SELECT * FROM jl_hy_zw 
+        where CLAN_ID = (SELECT CLAN_ID FROM app_user WHERE ID = #{USER_ID}) 
+        and CATEGORY_ID = (SELECT b.CATEGORY_ID FROM app_user a,company b WHERE a.COMPANY_ID = b.ID AND a.ID = #{USER_ID})
+	</select>
+	
+	<!-- 修改订单支付方式 -->
+	<update id="editOrderPayType" parameterType="pd" flushCache="false">
+		UPDATE orders SET PAY_TYPE=#{PAY_TYPE} WHERE ID = #{ID}
+	</update> 
+	
+	<!-- 查询上海建联的成员数量 -->
+	<select id="queryBySh" parameterType="pd" resultType="pd"> 
+	    SELECT count(*) as counts FROM APP_USER WHERE CLAN_ID='e960966a28ab4d70afb3f8414b8f0002' and isdel='1'
+	</select>
+	
+	<!-- 查询相应建联的成员数量 -->
+	<select id="queryByCid" parameterType="pd" resultType="pd"> 
+	    SELECT count(*) as counts FROM APP_USER WHERE CLAN_ID=#{CLAN_ID} and isdel='1'
+	</select>
+	
+	<!-- 查询用户升级入会修改的会员信息-->
+	<select id="queryUpgradeInfo" parameterType="pd" resultType="pd"> 
+	    SELECT ID,IS_VIP,VIP_LEVEL,CARD_NO FROM APP_USER WHERE ID=#{USER_ID} and isdel='1' 
+	</select> 
+</mapper>

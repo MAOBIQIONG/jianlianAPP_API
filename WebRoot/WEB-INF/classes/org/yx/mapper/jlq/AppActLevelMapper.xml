@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppActLevelMapper">
+
+	<!-- 添加用户参与活动信息 -->
+	<insert id="save" parameterType="pd">
+	  INSERT INTO ACTIVITY_LEVEL(ID,ACTIVITY_ID,BIANMA,DATE)
+	  VALUES(#{ID},#{ACT_ID},#{BIANMA},#{DATE})
+	</insert>  
+	
+	<delete id="delete" parameterType="pd">
+		delete from ACTIVITY_LEVEL WHERE  ACTIVITY_ID=#{ACT_ID}
+    </delete>  
+    
+     <!--根据活动Id查询活动参与等级信息 -->
+	<select id="queryLevelByAId" resultType="pd" parameterType="pd">
+	    SELECT S.NAME AS LEVEL_NAME,A.BIANMA FROM ACTIVITY_LEVEL A LEFT JOIN sys_dictionaries S ON A.BIANMA=S.BIANMA WHERE A.ACTIVITY_ID=#{ACT_ID} 
+	</select> 
+	 <!--根据活动Id查询活动参与等级信息用逗号隔开 -->
+	<select id="queryLevelByADJId" resultType="pd" parameterType="pd">
+	    select group_concat(BIANMA) as nids from ACTIVITY_LEVEL
+ 		WHERE ACTIVITY_ID=#{ACT_ID}
+	</select> 
+</mapper>

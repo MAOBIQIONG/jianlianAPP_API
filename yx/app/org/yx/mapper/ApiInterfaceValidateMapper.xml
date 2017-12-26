@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ApiInterfaceMethodMapper">
+
+	<!-- 根据接口id查询接口验证集合 -->
+	<select id="findValidateByMid" parameterType="pd" resultType="pd">
+		select * from api_interface_parameter_validate a where a.api_interface_method_id=#{api_interface_method_id}
+	</select>
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppQkMapper">
+	
+	<!-- 查询列表信息-->
+	<select id="queryQks" parameterType="pd" resultType="pd">
+		 SELECT Q.* FROM JL_QK Q WHERE Q.ISDEL=1 
+         ORDER BY Q.CREATE_DATE DESC   
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+</mapper>

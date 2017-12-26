@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppEntrustMapper"> 
+	<!-- 基本信息提交-->
+	<insert id="saveEntrust" parameterType="pd">
+		insert into jl_entrust(
+			ID,ENTRUST_NAME,ENTRUST_PHONE,IMG_PATH,CREATE_DATE
+		) values (
+			#{ID},#{ENTRUST_NAME},#{ENTRUST_PHONE},#{IMG_PATH},#{CREATE_DATE}
+		)
+	</insert> 
+	 
+	 <!--查询政府招商首页第一次分页数据 -->
+	<select id="queryByEntrustfy" parameterType="pd" resultType="pd">
+	  	SELECT J.ID,J.PRO_NAME,J.CITY,J.PUBLISH_DATE,C.SUBCLASS,T.TYPE_NAME,I.IMG_PATH FROM jl_zf_xm J LEFT JOIN jl_zf_cubclass C ON J.TYPE_ID=C.ID 
+   		LEFT JOIN JL_ZF_TYPE T ON T.TYPE_ID=C.TYPE_ID LEFT JOIN JL_ZF_IMG I ON J.ID=I.PRO_ID
+		WHERE J.STATUS=4 AND J.ISDEL=1 AND I.ORDER_BY=1
+		<if test="PRO_NAME !=null  and PRO_NAME!=''">	
+			and J.PRO_NAME LIKE CONCAT(CONCAT('%', #{PRO_NAME}),'%')
+		</if>  
+	 	<if test="TYPE_ID !=null  and TYPE_ID!=''">	
+			 and J.TYPE_ID=#{TYPE_ID}
+		</if>
+		<if test="CITY !=null  and CITY!=''">	
+			and J.CITY LIKE CONCAT(CONCAT('%', #{CITY}),'%') 
+		</if>
+		<if test="P_TYPE_ID !=null  and P_TYPE_ID!=''">	
+			and T.TYPE_ID=#{P_TYPE_ID}
+		</if>
+	 	<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	<!--查询政府招商项目详情 -->
+	<select id="queryByEntrustXQ" parameterType="pd" resultType="pd">
+	  	SELECT M.*,S.PHONE,S.REAL_NAME,T.TYPE_NAME,C.SUBCLASS FROM jl_zf_xm M LEFT JOIN app_user S ON M.MANAGER=S.ID 
+	  	LEFT JOIN jl_zf_cubclass C ON M.TYPE_ID=C.ID LEFT JOIN JL_ZF_TYPE T ON T.TYPE_ID=C.TYPE_ID
+	  	WHERE M.ISDEL=1
+	  	<if test="ID!=null and ID!=''">
+	 	    AND M.ID = #{ID}
+		</if>
+	</select>
+	<!--查询政府招商项目详情图片 -->
+	<select id="queryByEntrustXQIMG" parameterType="pd" resultType="pd">
+	  	SELECT ID,IMG_PATH,ORDER_BY FROM jl_zf_img WHERE PRO_ID = #{ID}
+	</select>
+	
+	<!--查询政府招商项目大分类 -->
+	<select id="queryType" resultType="pd">
+	  	SELECT * FROM jl_zf_type order by type_id asc
+	</select>
+	
+	<!--查询某个大分类下面的小分类-->
+	<select id="querySubClass" parameterType="pd" resultType="pd">
+	  	 SELECT * FROM jl_zf_cubclass where TYPE_ID =#{TYPE_ID}
+	</select>
+	
+	<!--查询全部小分类-->
+	<select id="queryAllSubClass" resultType="pd">
+	  	 SELECT * FROM jl_zf_cubclass
+	</select>
+</mapper>

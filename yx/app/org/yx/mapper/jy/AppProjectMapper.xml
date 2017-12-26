@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppProjectMapper">  
+
+    <!--查询交易首页信息-->
+	<select id="queryProIndexByParam" parameterType="pd" resultType="pd">
+		SELECT P.ID,P.PROJECT_NAME,P.COVER_PATH,P.USER_ID,P.CREATE_BY,P.IS_RESOURCE,P.PROJECT_CONTENT,P.IS_HOT,P.START_PRICE,
+		P.CREATE_DATE,P.TOTAL_BIDDER,P.STATUS,D.NAME AS STAGE_NAME,D.BIANMA,P.STAR_LEVEL,P.DUE_DATE &gt;now() AS DUE_STATUS,
+   		(SELECT  GROUP_CONCAT(IMG_PATH) from JL_XM_TP WHERE PRO_ID=P.ID AND P.IS_RESOURCE='1' ORDER BY ORDER_BY limit 0,3) AS pro_imgs
+		FROM PROJECT P LEFT JOIN sys_dictionaries D ON D.BIANMA=P.PROJECT_STAGE_ID WHERE P.STATUS &gt;=4 AND P.ISDEL=1 
+		<if test="PROJECT_NAME !=null and PROJECT_NAME !=''">
+		    and P.PROJECT_NAME LIKE CONCAT(CONCAT('%', #{PROJECT_NAME}),'%')
+		</if>  
+		<if test="PRO_NO !=null and PRO_NO !=''">
+		    and P.PRO_NO LIKE CONCAT(CONCAT('%', #{PRO_NO}),'%')
+		</if>  
+		<if test="CITY !=null and CITY !=''">
+		    and P.CITY =#{CITY}
+		</if>  
+		<if test="PROJECT_STAGE_ID !=null and PROJECT_STAGE_ID !=''">
+		    and P.PROJECT_STAGE_ID =#{PROJECT_STAGE_ID}
+		</if>   
+		<if test="USER_ID !=null and USER_ID !=''">
+		    and P.USER_ID =#{USER_ID}
+		</if>  
+		<if test="PROJECT_TYPE_ID !=null and PROJECT_TYPE_ID !=''">
+		    and (P.CATEGORY_ID =#{PROJECT_TYPE_ID} or P.PROJECT_TYPE_ID =#{PROJECT_TYPE_ID})
+		</if>  
+		<if test="DISTINGUISH !=null and DISTINGUISH !=''">
+		    and P.DISTINGUISH =#{DISTINGUISH}
+		</if>  
+		 ORDER BY P.CREATE_DATE DESC
+		 <if test="pageSize!=null and start!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>   
+	
+	<!-- 根据订阅信息查询项目信息--> 
+	<select id="queryDys" parameterType="pd" resultType="pd"> 
+		SELECT P.ID,P.PROJECT_NAME,P.USER_ID,P.CREATE_BY,P.COVER_PATH,P.IS_RESOURCE,P.IS_HOT,P.PROJECT_CONTENT,P.START_PRICE,
+		P.CREATE_DATE,P.TOTAL_BIDDER,P.STATUS,D.NAME AS STAGE_NAME,D.BIANMA,P.STAR_LEVEL,P.DUE_DATE &gt;now() AS DUE_STATUS
+		FROM PROJECT P LEFT JOIN sys_dictionaries D ON D.BIANMA=P.PROJECT_STAGE_ID WHERE  P.STATUS &gt;=4 
+		AND P.ISDEL=1  and (P.CATEGORY_ID in (SELECT CATE_ID FROM JL_DY_HY WHERE USER_ID=#{USER_ID}))
+		<if test="pageSize!=null and start!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>    
+	 
+	<!-- 修改参与人数 -->
+	<update id="updateCounts" parameterType="pd">
+		UPDATE PROJECT SET  
+		<if test="TOTAL_BIDDER != null and TOTAL_BIDDER !=''">
+		   TOTAL_BIDDER=#{TOTAL_BIDDER},
+		</if>  
+		<if test="MODIFY_DATE != null and MODIFY_DATE !=''">
+		   MODIFY_DATE=#{MODIFY_DATE},
+		</if>  
+		<if test="ISSYSLOOK != null and ISSYSLOOK !=''">
+		   ISSYSLOOK=#{ISSYSLOOK},
+		</if> 
+		ID=#{PRO_ID} WHERE ID=#{PRO_ID}
+    </update>  
+	
+	<!-- 新增-->
+	<insert id="save" parameterType="pd">
+		insert into project(
+			ID,PROJECT_NAME,PRO_NO,	USER_ID,ADDR,	DUE_DATE,	PROJECT_CONTENT,	
+			PROJECT_TYPE_ID,	RELEASE_DATE,	STATUS,COVER_PATH,IS_RESOURCE,
+			START_PRICE,MODIFY_BY,MODIFY_DATE,PROJECT_STAGE_ID,
+			BUILD_LAYERS,BUILD_AREA,FLOOR_AREA,AVAILABLE_MATERIALS,RESOURCE,DESCRIPTION,CITY,
+			PART_COUNT,CREATE_BY,START_DATE,CREATE_DATE,CATEGORY_ID
+		) values (
+			#{PRO_ID},#{PROJECT_NAME},#{PRO_NO},#{USER_ID},	#{ADDR},	#{DUE_DATE},	#{PROJECT_CONTENT},	
+			#{PROJECT_TYPE_ID},	#{RELEASE_DATE},#{STATUS},#{COVER_PATH},#{IS_RESOURCE},
+			#{START_PRICE},#{MODIFY_BY},#{MODIFY_DATE},#{PROJECT_STAGE_ID},
+			#{BUILD_LAYERS},#{BUILD_AREA},#{FLOOR_AREA},#{AVAILABLE_MATERIALS},#{RESOURCE},#{DESCRIPTION},#{CITY},
+			#{PART_COUNT},#{CREATE_BY},#{START_DATE},#{CREATE_DATE},#{CATEGORY_ID} 
+		)
+	</insert> 
+	
+	<!-- 修改项目信息-->
+	<update id="edit" parameterType="pd">
+		update  project set 
+		<if test="PROJECT_NAME !=null and PROJECT_NAME !='' ">
+		     PROJECT_NAME= #{PROJECT_NAME},
+		</if>
+		<if test="USER_ID !=null and USER_ID!='' ">	
+			USER_ID=#{USER_ID},
+		</if> 
+		<if test="ADDR !=null and ADDR !='' ">	
+			ADDR=#{ADDR},
+		</if>
+		<if test="DUE_DATE !=null and DUE_DATE !='' ">	
+			DUE_DATE=#{DUE_DATE},
+		</if>
+		<if test="PROJECT_CONTENT !=null and PROJECT_CONTENT !='' ">	
+			PROJECT_CONTENT=#{PROJECT_CONTENT},
+		</if>  
+		<if test="PROJECT_TYPE_ID !=null">	
+			PROJECT_TYPE_ID=#{PROJECT_TYPE_ID},
+		</if>
+		<if test="RELEASE_DATE !=null">	
+			RELEASE_DATE=#{RELEASE_DATE},
+		</if>
+		<if test="PROJECT_LEVEL !=null">
+			PROJECT_LEVEL=#{PROJECT_LEVEL},
+		</if>
+		<if test="STATUS !=null">	
+			STATUS=#{STATUS},
+		</if>   
+		<if test="PROJECT_STAGE_ID !=null">
+			PROJECT_STAGE_ID=#{PROJECT_STAGE_ID} ,
+		</if>
+		<if test="BID_REQUIREMENTS !=null">
+			BID_REQUIREMENTS=#{BID_REQUIREMENTS} ,
+		</if>
+		<if test="START_PRICE !=null">
+			START_PRICE=#{START_PRICE} ,
+		</if>
+		<if test="COLLECT_COUNT !=null">
+			COLLECT_COUNT=#{COLLECT_COUNT} ,
+		</if>   
+		<if test="IS_HOT !=null">
+			IS_HOT=#{IS_HOT} ,
+		</if> 
+		<if test="DESCRIPTION !=null">
+			 DESCRIPTION=#{DESCRIPTION} ,
+		</if> 
+		<if test="BUILD_LAYERS !=null">
+			BUILD_LAYERS=#{BUILD_LAYERS}, 
+		</if> 
+		<if test="BUILD_AREA !=null">
+			 BUILD_AREA=#{BUILD_AREA} ,
+		</if> 
+		<if test="FLOOR_AREA !=null">
+			 FLOOR_AREA=#{FLOOR_AREA}, 
+		</if> 
+		<if test="AVAILABLE_MATERIALS!=null">
+			AVAILABLE_MATERIALS=#{AVAILABLE_MATERIALS} ,
+		</if> 
+		<if test="RESOURCE!=null">
+			RESOURCE=#{RESOURCE}, 
+		</if>
+		<if test="AUDIT_BY !=null">
+			AUDIT_BY=#{AUDIT_BY},
+		</if>
+		<if test="AUDIT_DATE !=null">
+			 AUDIT_DATE=#{AUDIT_DATE},
+		</if> 
+		<if test="MODIFY_BY !=null">
+			MODIFY_BY=#{MODIFY_BY},
+		</if>
+		<if test="MODIFY_DATE !=null">
+			MODIFY_DATE=#{MODIFY_DATE},
+		</if> 
+		<if test="START_DATE !=null">
+			START_DATE=#{START_DATE},
+		</if> 
+		<if test="TOTAL_BIDDER !=null">
+			TOTAL_BIDDER=#{TOTAL_BIDDER},
+		</if>
+		<if test="PART_COUNT !=null">
+			PART_COUNT=#{PART_COUNT},
+		</if>
+		<if test="CITY !=null">
+			CITY=#{CITY},
+		</if> 
+		<if test="IS_RESOURCE !=null">
+			IS_RESOURCE=#{IS_RESOURCE},
+		</if> 
+		<if test="COVER_PATH !=null">
+			COVER_PATH=#{COVER_PATH},
+		</if> 
+		<if test="CATEGORY_ID !=null">
+			CATEGORY_ID=#{CATEGORY_ID},
+		</if>  
+		ID = #{PRO_ID} where ID = #{PRO_ID}
+	</update>
+	
+	<!-- 删除项目 --> 
+	<update id="delete" parameterType="pd" flushCache="false">
+		update  project set  ISDEL='2' WHERE ID=#{PRO_ID} 
+	</update>  
+	
+	<!-- 根据条件查询项目详情-->
+	<select id="queryById" parameterType="pd" resultType="pd">
+	SELECT P.*,CASE P.STATUS  WHEN '1' THEN '待审核'  WHEN '2' THEN '审核未通过'  WHEN '3' THEN '审核通过'  WHEN '4' THEN '接单中'  WHEN '5' THEN '已接单'  WHEN '6' THEN '交易完成' END AS PROJECT_STATUS,P.DUE_DATE &gt;now() AS DUE_STATUS,P.STAR_LEVEL,
+          U.REAL_NAME,SU.NAME AS SYS_NAME,U.IMG AS USER_IMG,D.NAME AS STAGE_NAME,D.BIANMA,E.NAME AS BID_NAME,A.REAL_NAME AS WINNER_NAME,S.REAL_NAME AS MANAGER_NAME ,S.PHONE AS MANAGER_PHONE,S.IMG AS MANAGER_IMG,(SELECT CP.COMPANY_NAME FROM COMPANY CP WHERE CP.ID=U.COMPANY_ID AND CP.ISDEL=1) AS COMPANY_NAME,U.COMPANY_ID,
+          (SELECT CY.COMPANY_NAME FROM COMPANY CY WHERE CY.ID=A.COMPANY_ID AND CY.ISDEL=1) AS BID_COMPANY, N.NAME AS NO_PASS,X.NAME,X.NAME AS LX_NAME,F.NAME AS PRO_LEVEL_NAME,CG.NAME AS CATE_NAME
+          FROM PROJECT P LEFT JOIN APP_USER U ON P.USER_ID=U.ID LEFT JOIN SYS_USER SU ON P.CREATE_BY=SU.ID LEFT JOIN APP_USER A ON P.BID_WINNER_ID=A.ID 
+		  LEFT JOIN sys_dictionaries D ON D.BIANMA=P.PROJECT_STAGE_ID LEFT JOIN sys_dictionaries E ON E.BIANMA=P.BID_REQUIREMENTS LEFT JOIN  sys_dictionaries F ON F.BIANMA=P.PROJECT_LEVEL
+      LEFT JOIN APP_USER S ON S.ID=P.PROJECT_MANAGER_ID  LEFT JOIN sys_dictionaries N ON N.BIANMA=P.NO_PASS_REASON LEFT JOIN JL_XM_LX X ON P.PROJECT_TYPE_ID=X.ID LEFT JOIN CATEGORY CG ON P.CATEGORY_ID=CG.ID
+		WHERE P.ID = #{PRO_ID} AND P.ISDEL=1
+	</select> 
+	
+	<!-- 根据项目Id查询项目所有信息，为修改做准备 -->
+	<select id="queryByProId" parameterType="pd" resultType="pd">
+	    SELECT P.*,P.DUE_DATE &gt;now() AS DUE_STATUS,X.NAME AS LX_NAME FROM PROJECT P LEFT JOIN JL_XM_LX X ON P.PROJECT_TYPE_ID=X.ID WHERE P.ID=#{PRO_ID} AND P.ISDEL=1
+	</select>  
+	
+	<!-- 我收藏的项目列表信息--> 
+	<select id="queryCollects" parameterType="pd" resultType="pd">
+		SELECT P.ID,P.PROJECT_NAME,P.COVER_PATH,P.IS_RESOURCE,P.USER_ID,P.CREATE_BY,P.IS_HOT,P.TOTAL_BIDDER,C.COLLECT_DATE,P.STAR_LEVEL,P.DUE_DATE &gt;now() AS DUE_STATUS,
+		(SELECT  GROUP_CONCAT(IMG_PATH) from JL_XM_TP WHERE PRO_ID=P.ID AND P.IS_RESOURCE='1' ORDER BY ORDER_BY limit 0,3) AS pro_imgs
+		FROM PROJECT P LEFT JOIN COLLECTION C ON P.ID=C.OBJECT_ID 
+		WHERE C.USER_ID=#{USER_ID} AND P.ISDEL=1 ORDER BY C.COLLECT_DATE DESC 
+		 <if test="pageSize!=null and start!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>    
+	
+	<!-- 我查看的项目列表信息--> 
+	<select id="queryCks" parameterType="pd" resultType="pd">
+		SELECT P.ID,P.PROJECT_NAME,P.COVER_PATH,P.IS_RESOURCE,P.IS_HOT,P.PROJECT_CONTENT,P.START_PRICE,P.USER_ID,P.CREATE_BY,P.CREATE_DATE,P.TOTAL_BIDDER,D.NAME AS STAGE_NAME,D.BIANMA,C.DATE,C.VIEW_COUNT,P.STAR_LEVEL,P.DUE_DATE &gt;now() AS DUE_STATUS
+		FROM PROJECT P LEFT JOIN sys_dictionaries D ON D.BIANMA=P.PROJECT_STAGE_ID 
+		LEFT JOIN JL_XM_CK C ON P.ID=C.PRO_ID WHERE C.USER_ID=#{USER_ID} AND P.ISDEL=1 ORDER BY C.DATE DESC 
+		 <if test="pageSize!=null and start!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>    
+	
+	<!-- 我参与的项目列表信息--> 
+	<select id="queryCys" parameterType="pd" resultType="pd">
+		SELECT P.ID,P.PROJECT_NAME,P.COVER_PATH,P.IS_RESOURCE,P.IS_HOT,P.PROJECT_CONTENT,P.USER_ID,P.CREATE_BY,P.START_PRICE,P.CREATE_DATE,P.TOTAL_BIDDER,P.STATUS,D.NAME AS STAGE_NAME,D.BIANMA,P.STAR_LEVEL,P.DUE_DATE &gt;now() AS DUE_STATUS,
+		(SELECT  GROUP_CONCAT(IMG_PATH) from JL_XM_TP WHERE PRO_ID=P.ID AND P.IS_RESOURCE='1' ORDER BY ORDER_BY limit 0,3) AS pro_imgs 
+		FROM PROJECT P LEFT JOIN sys_dictionaries D ON D.BIANMA=P.PROJECT_STAGE_ID 
+		LEFT JOIN PROJECT_BIDDER B ON P.ID=B.PROJECT_ID WHERE B.USER_ID=#{USER_ID} AND P.ISDEL=1
+		<if test="DISTINGUISH!=null and DISTINGUISH!=null">
+			AND P.DISTINGUISH=#{DISTINGUISH}
+		</if>
+		 ORDER BY B.BID_DATE DESC 
+		 <if test="pageSize!=null and start!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>  
+	
+	<!-- 我发布的项目列表信息--> 
+	<select id="queryFbs" parameterType="pd" resultType="pd">
+		SELECT P.ID,P.PROJECT_NAME,P.COVER_PATH,P.IS_RESOURCE,P.PROJECT_CONTENT,P.IS_HOT,P.STATUS,P.USER_ID,P.CREATE_BY,P.START_PRICE,P.CREATE_DATE,P.TOTAL_BIDDER,D.NAME AS STAGE_NAME,D.BIANMA,P.STAR_LEVEL,P.DUE_DATE &gt;now() AS DUE_STATUS,
+		(SELECT  GROUP_CONCAT(IMG_PATH) from JL_XM_TP WHERE PRO_ID=P.ID AND P.IS_RESOURCE='1' ORDER BY ORDER_BY limit 0,3) AS pro_imgs  
+		FROM PROJECT P LEFT JOIN sys_dictionaries D ON D.BIANMA=P.PROJECT_STAGE_ID  
+		WHERE P.ISDEL=1 AND P.USER_ID=#{USER_ID} ORDER BY P.MODIFY_DATE DESC 
+		 <if test="pageSize!=null and start!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>  
+	
+	<!-- 修改群名称 -->
+	<update id="updateGroupName" parameterType="pd">
+		UPDATE PROJECT SET  
+		<if test="GROUP_NAME != null and GROUP_NAME !=''">
+		   GROUP_NAME=#{GROUP_NAME},
+		</if>  
+		ID=#{PRO_ID} WHERE ID=#{PRO_ID}
+    </update>
+    
+    <!-- 热门项目列表搜索 -->
+	<select id="queryHotProject" resultType="pd">
+	   SELECT P.ID,P.PROJECT_NAME,P.PROJECT_CONTENT FROM PROJECT P WHERE P.IS_HOT=1 and P.STATUS &gt;=4 AND P.ISDEL=1 ORDER BY P.MODIFY_DATE DESC LIMIT 0,3 
+	</select> 
+    
+    <!-- 最新成功交易的项目 -->
+	<select id="queryNewBidder" resultType="pd">
+	   SELECT P.ID,P.PROJECT_NAME,P.COVER_PATH,P.IS_RESOURCE,P.USER_ID,P.CREATE_BY,P.PROJECT_CONTENT,P.COVER_PATH FROM PROJECT P WHERE  P.STATUS =6 AND P.ISDEL=1  ORDER BY P.BID_DATE DESC LIMIT 0,1
+	</select> 
+	
+	 <!-- 根据标题模糊查询 -->
+    <select id="queryProByTitle" parameterType="pd" resultType="pd">
+		SELECT p.ID,PROJECT_NAME,p.COVER_PATH,p.IS_RESOURCE,p.PROJECT_CONTENT,p.STATUS,p.USER_ID,p.CREATE_BY,'PRO' AS TABLE_NAME from PROJECT p 
+		where p.STATUS &gt;=4 AND p.ISDEL=1
+       <if test="TITLE != null and TITLE !=''">
+		   AND p.PROJECT_NAME LIKE CONCAT(CONCAT('%', #{TITLE}),'%')
+		</if>    
+    </select> 
+    
+     <!-- 查询项目经理的信息-->
+	<select id="queryManager" parameterType="pd" resultType="pd">
+		SELECT A.ID,A.REAL_NAME,A.PLATFORM,P.PROJECT_NAME,P.ID AS PID FROM APP_USER A LEFT JOIN PROJECT P ON A.ID=P.PROJECT_MANAGER_ID WHERE P.ID=#{PRO_ID}
+	</select> 
+	
+	 <!--根据项目id推荐同行业项目-->
+	<select id="queryProRecomm" parameterType="pd" resultType="pd">
+		SELECT ID,PROJECT_NAME,COVER_PATH,USER_ID,CREATE_BY,IS_RESOURCE FROM PROJECT WHERE CATEGORY_ID=#{CATEGORY_ID} and DISTINGUISH=#{DISTINGUISH} ORDER BY RELEASE_DATE DESC LIMIT 0,3
+	</select>  
+	
+	<!--根据项目id推荐同行业需求项目-->
+	<select id="queryReqRecomm" parameterType="pd" resultType="pd">
+		SELECT P.ID,P.PROJECT_NAME,P.USER_ID,P.CREATE_BY,P.IS_RESOURCE,T.IMG_PATH AS COVER_PATH FROM PROJECT P LEFT JOIN JL_XM_TP T ON P.ID=T.PRO_ID AND T.ORDER_BY=0 WHERE P.CATEGORY_ID=#{CATEGORY_ID} and P.DISTINGUISH=#{DISTINGUISH} ORDER BY P.RELEASE_DATE DESC LIMIT 0,3
+	</select>  
+	
+	<!--查询-->
+	<select id="queryMaxProNo" parameterType="pd" resultType="pd">
+		SELECT MAX(PRO_NO) as PRO_NO FROM PROJECT WHERE IS_RESOURCE=#{IS_RESOURCE}
+		<if test="PRO_NO !=null and PRO_NO !=''">
+		   and PRO_NO LIKE CONCAT(CONCAT('%', #{pro_no}),'%')
+		</if>  
+	</select>   
+	
+	<!--查询订阅的行业-->
+	<select id="queryDyHy" parameterType="pd" resultType="pd">
+		SELECT H.ID,H.USER_ID,H.CATE_ID,C.NAME FROM JL_DY_HY H LEFT JOIN CATEGORY C ON C.ID=H.CATE_ID 
+		WHERE H.USER_ID=#{USER_ID}	  
+	</select>   
+</mapper>

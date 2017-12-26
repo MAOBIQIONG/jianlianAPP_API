@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppUpgradeMapper">   
+	 
+	<!-- 查询当前用户的升级入会信息 -->
+	<select id="queryByUid" resultType="pd" parameterType="pd">
+	    SELECT U.ID,U.STATUS,U.ORDER_ID,U.UPGRADE_LEVEL,D.NAME AS LEVEL_NAME,CASE STATUS WHEN '00' THEN '待支付' WHEN '01' THEN '审核中' WHEN '02' THEN '审核未通过' WHEN '03' THEN '审核通过' WHEN '04' THEN '撤销中' WHEN '05' THEN '已撤销' END AS STATUS_NAME 
+	    FROM JL_UPGRADE U LEFT JOIN SYS_DICTIONARIES D ON U.UPGRADE_LEVEL=D.BIANMA WHERE U.USER_ID=#{USER_ID} and U.STATUS!='03' and U.STATUS!='05'
+	</select>  
+	
+	<!-- 查询当前用户的升级入会信息 (根据id查询)-->
+	<select id="queryById" resultType="pd" parameterType="pd">
+	    SELECT U.*,CASE U.REASON_BIANMA WHEN '133' THEN U.NOPASS_REASON ELSE S.NAME END AS  NOPASS_REASON ,D.NAME AS LEVEL_NAME,
+	    CASE U.STATUS WHEN '00' THEN '待支付' WHEN '01' THEN '审核中' WHEN '02' THEN '审核未通过' WHEN '03' THEN '审核通过' WHEN '04' THEN '撤销中' WHEN '05' THEN '已撤销' END AS STATUS_NAME
+        FROM JL_UPGRADE U LEFT JOIN SYS_DICTIONARIES D ON U.UPGRADE_LEVEL =D.BIANMA LEFT JOIN SYS_DICTIONARIES S ON U.REASON_BIANMA=S.BIANMA WHERE U.ID=#{UP_ID}
+	</select>    
+	
+	<!-- 查询当前用户要升级的等级之前是否已经申请过 -->
+	<select id="checkIsApply" resultType="pd" parameterType="pd">
+	   SELECT * FROM JL_UPGRADE WHERE USER_ID=#{USER_ID} AND UPGRADE_LEVEL=#{LEVEL} AND STATUS &lt;='03'
+	</select>  
+	
+	<!-- 新增用户升级入会信息-->
+	<insert id="save" parameterType="pd">
+	    INSERT into JL_UPGRADE(ID,USER_ID,ORDER_ID,UPGRADE_LEVEL,PRICE_TOPAY,STATUS,CREATE_DATE,LEVEL) 
+	    VALUE(#{ID},#{USER_ID},#{ORDER_ID},#{UPGRADE_LEVEL},#{PRICE_TOPAY},#{STATUS},#{CREATE_DATE},#{LEVEL})
+	</insert>  
+	
+	<!-- 修改用户名片 -->
+	<update id="editStatus" parameterType="pd" flushCache="false">
+		UPDATE JL_UPGRADE SET STATUS=#{STATUS} WHERE USER_ID=#{USER_ID} AND ORDER_ID=#{ORDER_ID}
+	</update> 
+	
+	<!-- 修改记录的状态 -->
+	<update id="editUpStatus" parameterType="pd" flushCache="false">
+		UPDATE JL_UPGRADE SET STATUS=#{STATUS} WHERE ORDER_ID=#{ORDER_ID}
+	</update> 
+	
+</mapper>

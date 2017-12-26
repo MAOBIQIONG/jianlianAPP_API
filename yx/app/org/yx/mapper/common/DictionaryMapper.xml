@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DictionaryMapper">
+	<select id="findAllAreasCities"  resultType="pd" >
+		 SELECT  a.id as id,a.areacode AS areacode, a.areaname AS  areaname, b.areacode as citycode,b.areaname as cityname
+ 		 from  (SELECT id, areacode, areaname,parentid FROM sys_area WHERE parentid ='0') a
+ 		 LEFT JOIN
+   		 SYS_AREA b
+   		 ON b.parentid=a.areacode order by a.areacode asc ,b.areacode ASC  ;
+	</select> 
+
+</mapper>

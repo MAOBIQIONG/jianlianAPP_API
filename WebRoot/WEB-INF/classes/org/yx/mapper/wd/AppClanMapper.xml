@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppClanMapper"> 
+
+	 <!-- 获取列表信息 -->
+	<select id="queryByParam" parameterType="pd" resultType="pd">
+	    SELECT C.ID,C.IMG_PATH,C.NAME,C.MEMBER_COUNT,U.ID AS UID FROM CLAN C LEFT JOIN CLAN_USER U ON C.ID=U.CLAN_ID AND U.USER_ID=#{USER_ID} 
+	    WHERE C.ISDEL=1 
+	    <if test="NAME !=null and NAME!=''">
+	       and C.NAME LIKE CONCAT(CONCAT('%', #{NAME}),'%')	 
+		</if> 
+		<if test="AREA_CODE !=null and AREA_CODE!=''">
+	       and C.AREA_CODE =#{AREA_CODE} 
+		</if> 
+	     ORDER BY C.CREATE_DATE DESC 
+	    <if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	 <!-- 获取某个用户关注的城市建联信息 -->
+	<select id="queryByUId" resultType="pd" parameterType="pd">
+	   SELECT C.ID,C.IMG_PATH,C.NAME,C.MEMBER_COUNT FROM CLAN_USER U LEFT JOIN CLAN C ON C.ID=U.CLAN_ID 
+	   WHERE C.ISDEL=1 AND U.USER_ID=#{USER_ID}
+	    <if test="NAME !=null and NAME!=''">
+	       and C.NAME LIKE CONCAT(CONCAT('%', #{NAME}),'%')	 
+		</if>
+		<if test="AREA_CODE !=null and AREA_CODE!=''">
+	       and C.AREA_CODE =#{AREA_CODE} 
+		</if> 
+	    ORDER BY U.DATE DESC 
+	    <if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+	 
+	 <!-- 获取某个城市建联的详细信息 -->
+	<select id="queryById" resultType="pd" parameterType="pd">
+	   SELECT * FROM CLAN  WHERE ID =#{CLAN_ID} AND ISDEL=1
+	</select> 
+	
+	 <!-- 获取上海建联的详细信息 -->
+	<select id="queryShClan" resultType="pd">
+	   SELECT * FROM CLAN  WHERE ID ='e960966a28ab4d70afb3f8414b8f0002'
+	</select>  
+	
+	 <!-- 获取会员所属建联的详细信息 -->
+	<select id="queryByUserId" resultType="pd" parameterType="pd">
+	   SELECT C.* FROM APP_USER A LEFT JOIN CLAN C ON A.CLAN_ID=C.ID WHERE A.ID=#{USER_ID}
+	</select>   
+	
+	 <!-- 获取某个城市建联的关注用户（分页） -->
+	<select id="queryGzUsers" resultType="pd" parameterType="pd">
+	    SELECT  A.ID,A.IMG,A.REAL_NAME,A.POSITION,P.COMPANY_NAME FROM CLAN_USER CN LEFT JOIN 
+       APP_USER A ON CN.USER_ID=A.ID AND CN.CLAN_ID=#{CLAN_ID} LEFT JOIN COMPANY P ON A.COMPANY_ID=P.ID 
+	   WHERE  A.ISDEL=1
+	   <if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+	   </if>
+	</select> 
+	
+	<!-- 查询某个城市建联的成员（分页）-->
+	<select id="queryClanMembers" parameterType="pd" resultType="pd"> 
+		SELECT AU.ID AS UID,AU.IMG,AU.REAL_NAME,CP.COMPANY_NAME,AU.POSITION,AU.IS_VIP,AU.FLAG,AU.SHOW_NAME,
+		CASE AU.VIP_LEVEL WHEN '01' THEN '会员' WHEN '02' THEN '普通会员' WHEN '03' THEN '副会长' WHEN '04' THEN '常务副会长' WHEN '05' THEN '会长' END AS VIP_LEVEL 
+		from app_user AU LEFT JOIN clan CL ON AU.CLAN_ID=CL.ID LEFT JOIN company CP ON AU.COMPANY_ID=CP.ID
+		 WHERE AU.CLAN_ID=#{CLAN_ID} AND AU.ISDEL=1
+		 order by AU.FLAG asc,AU.IS_VIP desc,AU.VIP_LEVEL desc
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+    </select>   
+	
+	<!-- 修改城市建联关注人数 --> 
+	<update id="updateCounts" parameterType="pd">
+		UPDATE CLAN SET 
+		<if test="NUMBER_COUNTS !=null">	
+			  NUMBER_COUNTS=#{NUMBER_COUNTS},
+		</if>
+		<if test="MEMBER_COUNT !=null">	
+			  MEMBER_COUNT=#{MEMBER_COUNT},
+		</if>
+		<if test="ISSYSLOOK !=null">	
+			  ISSYSLOOK=#{ISSYSLOOK},
+		</if>
+		   ID=#{CLAN_ID} WHERE ID=#{CLAN_ID}
+    </update> 
+    
+    <select id="queryClans" parameterType="pd" resultType="pd">
+	    SELECT NAME AS text,ID AS value FROM clan WHERE  AREA_CODE=#{value} AND ISDEL=1
+	</select> 
+	
+	<select id="queryAll" resultType="pd">
+		SELECT A.AREACODE, A.AREANAME, B.NAME ,B.ID FROM  (SELECT AREACODE,AREANAME FROM SYS_AREA WHERE PARENTID ='0') A
+ 		 LEFT JOIN CLAN B ON B.AREA_CODE=A.AREACODE ORDER BY A.AREACODE ASC;
+	</select>
+</mapper>

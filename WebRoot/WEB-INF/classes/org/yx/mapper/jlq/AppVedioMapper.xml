@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppVedioMapper"> 
+	 
+	<!--STATUS='03'表示审核已通过--> 
+	<select id="queryList" resultType="pd" parameterType="pd">
+	   SELECT V.ID,V.TITLE,V.URL,V.CREATE_DATE FROM JL_VEDIO V WHERE V.STATUS='02' AND V.ISDEL='1'
+	    ORDER BY V.ORDER_BY ASC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+</mapper>

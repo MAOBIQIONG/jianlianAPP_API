@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppDyHyMapper">
+
+     <!-- 添加类型阶段-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_DY_HY(ID,USER_ID,CATE_ID,CATE_PID,DATE) values(#{ID},#{USER_ID},#{CATE_ID},#{CATE_PID},#{DATE})  
+    </insert>
+    
+    <!-- 删除类型阶段 -->
+	<delete id="delete" parameterType="pd" flushCache="false">
+		delete from JL_DY_HY where ID = #{HY_ID} 
+	</delete>  
+	
+	<!--查询用户订阅的行业信息-->
+    <select id="queryDyHy" parameterType="pd" resultType="pd">
+   		SELECT G.*,D.ID AS HY_ID FROM CATEGORY G LEFT JOIN JL_DY_HY D ON G.ID=D.CATE_ID AND D.USER_ID=#{USER_ID}  WHERE G.PID=#{pid} 
+	</select>   
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppXmtpMapper">
+	 <!-- 添加图片 -->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_XM_TP(ID,PRO_ID,IMG_PATH,ORDER_BY,DATE) values(#{ID},#{PRO_ID},#{IMG_PATH},#{ORDER_BY},#{DATE})  
+    </insert>  
+    
+     <!-- 删除图片 -->
+	 <delete id="del" parameterType="pd">
+		delete from JL_XM_TP where 1=1
+		<if test="TP_ID !=null and TP_ID !='' ">
+		    and  ID =#{TP_ID}
+		</if>
+		<if test="PRO_ID !=null and PRO_ID !='' ">
+		     and PRO_ID =#{PRO_ID}
+		</if>
+		
+	 </delete>  
+    
+    <!--根据项目id查询项目的图片-->
+    <select id="queryByPid" parameterType="pd" resultType="pd">
+   		SELECT * FROM JL_XM_TP  WHERE PRO_ID=#{PRO_ID} ORDER BY ORDER_BY
+	</select> 
+	
+	 <!--根据项目id查询项目的图片用于列表展示，最多三张-->
+    <select id="queryImgsByPid" parameterType="pd" resultType="pd"> 
+   		SELECT * FROM JL_XM_TP  WHERE PRO_ID=#{ID} ORDER BY ORDER_BY  LIMIT 0,3 
+	</select> 
+	
+	<!-- 修改项目信息-->
+	<update id="edit" parameterType="pd">
+		update  JL_XM_TP set 
+		<if test="IMG_PATH !=null and IMG_PATH !='' ">
+		     IMG_PATH= #{IMG_PATH},
+		</if>
+		<if test="ORDER_BY !=null and ORDER_BY!='' ">	
+			ORDER_BY=#{ORDER_BY},
+		</if>  
+		<if test="PRO_ID !=null and PRO_ID!='' ">	
+			PRO_ID=#{PRO_ID},
+		</if>  
+		<if test="DATE !=null and DATE!='' ">	
+			DATE=#{DATE},
+		</if>  
+		ID = #{TP_ID} where ID = #{TP_ID}
+	</update>   
+</mapper>

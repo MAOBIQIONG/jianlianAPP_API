@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppPyqMapper"> 
+
+	<!-- 获取朋友圈列表信息-分页 -->
+    <select id="queryPageByParam" parameterType="pd" resultType="pd">
+   		 SELECT P.*,P.ID AS PYQ_ID,A.ID AS AID,A.REAL_NAME AS REAL_NAME,A.IMG AS USER_IMG 
+         FROM JL_PYQ P 	LEFT JOIN APP_USER A ON P.USER_ID =A.ID 
+         ORDER BY P.PUBLISH_DATE DESC 
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>    
+	  <!-- <select id="queryPageByParam" parameterType="pd" resultType="pd">
+   		 SELECT P.*,A.ID AS AID,A.REAL_NAME AS REAL_NAME,A.IMG AS USER_IMG ,D.ID AS ISAGREE
+         FROM JL_PYQ P 	LEFT JOIN APP_USER A ON P.USER_ID =A.ID LEFT JOIN jl_pyq_dz D ON P.ID=D.PYQ_ID 
+         WHERE P.USER_ID=#{USER_ID} OR P.USER_ID in (select CONTRACT_ID from  my_contracts C where C.user_id=#{USER_ID}) 
+         ORDER BY P.PUBLISH_DATE DESC   
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>     -->
+	
+	<!-- 查询附近数据-分页 -->
+    <select id="queryNearByParam" parameterType="pd" resultType="pd">
+   		SELECT P.*,A.ID AS AID,A.REAL_NAME AS REAL_NAME,A.IMG AS USER_IMG,D.ID AS ISAGREE,C.ID AS ISCONTRACTS,
+		ROUND(6378.138*2*ASIN(SQRT(POW(SIN((#{LAT}*PI()/180-lat*PI()/180)/2),2)+COS(#{LAT}*PI()/180)*COS(lat*PI()/180)*POW(SIN((#{LNG}*PI()/180-lng*PI()/180)/2),2)))*1000)AS distance 
+		FROM JL_PYQ P 
+		LEFT JOIN  my_contracts C ON P.USER_ID=C.CONTRACT_ID AND C.USER_ID=#{USER_ID}
+		LEFT JOIN APP_USER A ON P.USER_ID =A.ID 
+		LEFT JOIN jl_pyq_dz D ON P.ID=D.PYQ_ID 
+		WHERE 1=1 
+		<if test="DISTANCE!=null and DISTANCE!=''">
+			HAVING distance &lt; #{DISTANCE}
+		</if>
+		ORDER BY distance  
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+    
+	<!-- 添加朋友圈信息-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_PYQ(ID,USER_ID,PUBLISH_DATE,CONETENT,COMMENT_COUNT,LIKE_COUNT,SHARE_COUNT,CITY,ADDR,LNG,LAT,STATUS)
+		values(#{ID},#{USER_ID},#{PUBLISH_DATE},#{CONETENT},#{COMMENT_COUNT},#{LIKE_COUNT},#{SHARE_COUNT},#{CITY},#{ADDR},#{LNG},#{LAT},#{STATUS})  
+    </insert>
+    
+    <!-- 查询朋友圈信息详情 -->
+    <select id="queryById" parameterType="pd" resultType="pd"> 
+		SELECT P.*,A.ID AS AID,A.REAL_NAME AS REAL_NAME,A.IMG AS USER_IMG ,D.ID AS ISAGREE FROM JL_PYQ P LEFT JOIN APP_USER A ON P.USER_ID =A.ID 
+		LEFT JOIN jl_pyq_dz D ON P.ID=D.PYQ_ID WHERE P.ID=#{PYQ_ID}
+	</select>  
+	
+	<!-- 查询朋友圈基本信息 -->
+    <select id="queryByPyqId" parameterType="pd" resultType="pd"> 
+		SELECT * FROM JL_PYQ WHERE ID=#{PYQ_ID}
+	</select>  
+	
+	<!-- 修改朋友圈的点赞、评论次数 -->
+	<update id="updateCounts" parameterType="pd">
+		UPDATE JL_PYQ SET 
+		<if test="COMMENT_COUNT != null and COMMENT_COUNT !=''">
+		   COMMENT_COUNT=COMMENT_COUNT+1,
+		</if> 
+		<if test="LIKE_COUNT != null and LIKE_COUNT !=''">
+		   LIKE_COUNT=#{LIKE_COUNT},
+		</if>
+		ID=#{PYQ_ID} WHERE ID=#{PYQ_ID}
+    </update> 
+    
+    <!--删除朋友圈信息-->
+	 <delete id="del" parameterType="pd">
+		delete from JL_PYQ where ID=#{PYQ_ID}
+	 </delete>  
+</mapper>

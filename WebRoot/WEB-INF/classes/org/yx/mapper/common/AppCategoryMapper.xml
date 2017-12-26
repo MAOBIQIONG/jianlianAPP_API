@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppCategoryMapper"> 
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="pd" resultType="pd">
+		SELECT * FROM CATEGORY WHERE ISDEL=1 
+	</select>  
+	
+	<select id="listByPId" parameterType="String" resultType="pd">
+		SELECT ID as value,NAME as text FROM CATEGORY WHERE PID =#{PID} AND ISDEL=1 
+	</select>  
+	
+	<select id="queryByPId" parameterType="String" resultType="pd">
+		SELECT ID as value,NAME as text,VALERIE FROM CATEGORY WHERE PID =#{PID} AND ISDEL=1 
+	</select>  
+	
+	 <!--查询用户订阅的行业名称-->
+	<select id="queryDysName" parameterType="pd" resultType="pd">
+		 SELECT G.NAME FROM JL_DY_HY H LEFT JOIN CATEGORY G ON H.CATE_ID =G.ID WHERE H.USER_ID=#{USER_ID}
+	</select> 
+	
+	<!--查询商城首页显示的行业信息-->
+	<select id="queryShopCate" resultType="pd">
+		 SELECT * FROM CATEGORY WHERE ISINDEX=1 AND ISDEL=1 ORDER BY ORDER_BY ASC LIMIT 0,8
+	</select> 
+	
+	<!--查询商城首页显示的行业信息-->
+	<select id="queryCates" resultType="pd">
+		 SELECT ID as value,NAME as text FROM CATEGORY WHERE PID ='0' AND ISDEL=1 
+	</select>  
+	
+	<!--查询行业名称-->
+	<select id="queryNameById" parameterType="pd" resultType="pd">
+		 SELECT NAME FROM CATEGORY WHERE ID =#{CATEGORY_ID} AND ISDEL=1 
+	</select>  
+</mapper>

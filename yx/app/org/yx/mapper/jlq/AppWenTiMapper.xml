@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppWenTiMapper">
+
+	<!-- 查询问答列表信息-分页 -->
+	<select id="queryPageByParam" parameterType="pd" resultType="pd">
+		SELECT W.*,A.ID AS USER_ID,A.REAL_NAME,A.IMG,D.NAME AS TOPIC_NAME,D.ZD_ID AS TOPIC_ID 
+		FROM JL_WT W LEFT JOIN app_user A ON W.USER_ID=A.ID LEFT JOIN JL_BQ B ON W.ID=B.WT_ID LEFT JOIN sys_dictionaries D ON B.BIANMA=D.BIANMA
+ 		WHERE B.ORDER_BY=1 AND W.ISDEL=1
+		<if test="USER_ID !=null">	
+			and W.USER_ID = #{USER_ID}
+		</if>
+		<if test="TITLE !=null and TITLE !=''">	
+			and (W.TITLE LIKE CONCAT(CONCAT('%', #{TITLE}),'%') or D.NAME LIKE CONCAT(CONCAT('%', #{TITLE}),'%'))
+		</if> 
+		ORDER BY W.CREATE_DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+	
+	<!-- 查询问答详情信息-->
+	<select id="queryById" parameterType="pd" resultType="pd">
+		SELECT W.* FROM JL_WT W WHERE W.ISDEL=1 and W.ID = #{WT_ID}
+	</select>  
+	
+	<!-- 添加提问-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_WT(ID,TITLE,DESCRIPTION,IMG_PATH,AGREE_COUNT,COMMENT_COUNT,FOCUS_COUNT,USER_ID,CREATE_DATE)
+		values(#{ID},#{TITLE},#{DESCRIPTION},#{IMG_PATH},#{AGREE_COUNT},#{COMMENT_COUNT},#{FOCUS_COUNT},#{USER_ID},#{CREATE_DATE})  
+    </insert>  
+    
+    <!-- 修改问题的的点赞、回答、关注次数 -->
+	<update id="updateCounts" parameterType="pd">
+		UPDATE JL_WT SET 
+		<if test="COMMENT_COUNT != null">
+		   COMMENT_COUNT=COMMENT_COUNT+1,
+		</if> 
+		<if test="FOCUS_COUNT != null">
+		   FOCUS_COUNT=#{FOCUS_COUNT},
+		</if>
+		<if test="AGREE_COUNT != null">
+		   AGREE_COUNT=#{AGREE_COUNT},
+		</if>
+		ID=#{WT_ID} WHERE ID=#{WT_ID}
+    </update> 
+    
+      <!-- 根据参数查询关注数量 -->
+	<select id="queryCounts" parameterType="pd" resultType="pd">
+		SELECT FOCUS_COUNT,AGREE_COUNT,COMMENT_COUNT FROM JL_WT WHERE ID=#{WT_ID}
+	</select>   
+	
+	  <!-- 查询某个人回答的问题列表 -->
+	<select id="queryHdByUid" parameterType="pd" resultType="pd">
+		SELECT W.* FROM JL_WT W LEFT JOIN JL_HD H ON W.ID=H.WT_ID 
+		WHERE H.USER_ID=#{USER_ID} ORDER BY H.DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+</mapper>

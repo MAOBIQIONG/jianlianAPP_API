@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppGzMapper">
+
+	<!-- 查询问答关注列表信息-分页 -->
+	<select id="queryPageByParam" parameterType="pd" resultType="pd">
+		SELECT W.* FROM JL_GZ G LEFT JOIN  JL_WT W ON G.WT_ID=W.ID
+ 		WHERE  W.ISDEL=1 AND G.USER_ID=#{USER_ID}	 
+		ORDER BY G.DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+ 
+     <!-- 取消关注 -->
+	 <delete id="del" parameterType="pd">
+		delete from JL_GZ where USER_ID =#{USER_ID} AND WT_ID=#{WT_ID}
+	 </delete>   
+ 
+	<!-- 添加关注-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_GZ(ID,USER_ID,WT_ID,DATE) values (#{ID},#{USER_ID},#{WT_ID},#{DATE})  
+    </insert>  
+    
+    <!-- 查询当前用户是否关注过 -->
+	<select id="checkGz" parameterType="pd" resultType="pd">
+		SELECT * FROM JL_GZ WHERE USER_ID =#{USER_ID} AND WT_ID=#{WT_ID}
+	</select>   
+</mapper>

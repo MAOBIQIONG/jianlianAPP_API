@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppCertsMapper">   
+	 
+	<!-- 查询当前用户的三证信息 -->
+	<select id="querySanZh" resultType="pd" parameterType="pd">
+	   SELECT C.ID,C.CERTIFICATE_NAME,C.STATUS,C.IMG_PATH FROM CERTIFICATES C WHERE C.USER_ID=#{USER_ID} AND C.CERTIFICATE_TYPE=#{CERTIFICATE_TYPE}
+	</select>  
+</mapper>

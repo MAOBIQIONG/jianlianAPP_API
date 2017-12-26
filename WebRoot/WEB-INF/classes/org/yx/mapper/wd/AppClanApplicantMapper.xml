@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppClanApplicantMapper">   
+	
+	<!--添加城市合伙人申请信息 -->
+	<insert id="save" parameterType="pd">
+		insert into JL_CLAN_APPLICANT(ID,NAME,PHONE,DESP,APPLY_DATE,STATUS,0) 
+		values (#{ID},#{NAME},#{PHONE},#{DESP},#{APPLY_DATE},#{STATUS},#{ISSYSLOOK})
+	</insert>
+	
+	<select id="queryByUid" parameterType="pd" resultType="pd">
+	    SELECT * FROM JL_CLAN_APPLICANT C WHERE C.USER_ID=#{USERID}
+	</select>
+	
+</mapper>

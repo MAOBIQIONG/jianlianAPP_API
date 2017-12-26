@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppUserHonorMapper">  
+	
+	 <!-- 查询某个用户的荣誉信息 -->
+	<select id="queryUserHonors" resultType="pd" parameterType="pd">
+	 	SELECT H.* FROM JL_USER_HONOR H WHERE H.USER_ID=#{USER_ID}
+	</select>   
+	
+	<!-- 新增用户荣誉-->
+	<insert id="saveHonors" parameterType="pd">
+	    INSERT into JL_USER_HONOR(ID,HONOR,USER_ID,GET_DATE,CREATE_DATE) 
+	    VALUE(#{ID},#{HONOR},#{USER_ID},#{GET_DATE},NOW())
+	</insert>
+	
+	<!-- 取消用户荣誉 -->
+	 <delete id="delete" parameterType="pd" flushCache="false">
+		 DELETE FROM JL_USER_HONOR  where USER_ID=#{USER_ID}
+	</delete>  
+</mapper>

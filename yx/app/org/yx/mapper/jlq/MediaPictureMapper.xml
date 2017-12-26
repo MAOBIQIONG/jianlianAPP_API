@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MediaPictureMapper"> 
+
+	<!-- 获取对应朋友圈信息的图片-->
+    <select id="queryByParam" parameterType="pd" resultType="pd">
+   		SELECT * FROM JL_MEDIA_PICTURE  WHERE MEDIA_ID=#{ID} ORDER BY DATE ASC
+	</select>    
+    
+	<!-- 添加朋友圈图片-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_MEDIA_PICTURE(ID,IMG_PATH,MEDIA_ID,DATE,SIZE)
+		values(#{ID},#{IMG_PATH},#{MEDIA_ID},#{DATE},#{SIZE}) 
+    </insert>
+    
+</mapper>

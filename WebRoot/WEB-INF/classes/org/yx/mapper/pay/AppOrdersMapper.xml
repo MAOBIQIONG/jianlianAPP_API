@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppOrdersMapper">   
+
+	<!-- 根据id查询 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		SELECT * FROM ORDERS WHERE ID=#{ORDER_ID} AND ISDEL=1
+	</select>  
+	
+	<!-- 根据id查询 -->
+	<select id="findByOid" parameterType="pd" resultType="pd">
+		SELECT ID, STATUS,CASE STATUS WHEN '01' THEN '待支付' WHEN '02' THEN '支付失败' WHEN '03' THEN '支付成功' WHEN '04' THEN '退款中' WHEN '05' THEN '已退款' 
+         WHEN '06' THEN '已作废' WHEN '07' THEN '索要发票' WHEN '08' THEN '发票已处理' WHEN '20' THEN '订单已取消' END AS STATUS_NAME FROM ORDERS  WHERE ID=#{ORDER_ID} AND ISDEL=1  
+	</select>   
+	
+	<!-- 根据OBJECT_ID、USER_ID查询 -->
+	<select id="queryByObj" parameterType="pd" resultType="pd">
+		SELECT * FROM ORDERS WHERE OBJECT_ID = #{OBJECT_ID} AND USER_ID = #{USER_ID} AND ISDEL=1
+	</select>
+	
+	<!-- 新增-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO ORDERS( ID,USER_ID,PRICE,STATUS,TYPE,OBJECT_ID,EVENT,DATE) 
+		values ( #{ORDER_ID},#{USER_ID},#{PRICE},#{STATUS},#{TYPE},#{OBJECT_ID},#{EVENT},#{DATE})
+	</insert>
+	 
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd">
+		UPDATE ORDERS SET 
+		<if test="USER_ID !=null">
+		     USER_ID= #{USER_ID},
+		</if>
+		<if test="PRICE !=null">
+		     PRICE= #{PRICE},
+		</if>
+		<if test="STATUS !=null">
+		     STATUS= #{STATUS},
+		</if>
+		<if test="TYPE !=null">
+		     TYPE= #{TYPE},
+		</if>
+		<if test="OBJECT_ID !=null">
+		     OBJECT_ID= #{OBJECT_ID},
+		</if>
+		<if test="EVENT !=null">
+		     EVENT= #{EVENT},
+		</if> 
+		<if test="DATE !=null">
+		    DATE=#{DATE},
+		</if> 
+		ID = #{ORDER_ID}
+		WHERE ID = #{ORDER_ID}
+	</update>   
+	 
+	<update id="delete" parameterType="pd">
+		UPDATE ORDERS SET ISDEL='2' WHERE ID = #{ORDER_ID}
+	</update>   
+	
+	<update id="obdelete" parameterType="pd">
+		UPDATE ORDERS SET ISDEL=2 
+		WHERE ID = #{ID}
+	</update>  
+	<!-- 根据用户id和活动id修改订单状态 -->
+	<update id="editStatus" parameterType="pd">
+		UPDATE ORDERS SET STATUS='04' WHERE OBJECT_ID = #{OBJECT_ID} AND USER_ID= #{USER_ID}
+	</update> 
+	
+	<!-- 修改 -->
+	<update id="editPrice" parameterType="pd">
+		UPDATE ORDERS SET  
+		<if test="PRICE !=null">
+		     PRICE=#{PRICE},
+		</if> 
+		ID = #{ORDER_ID}
+		WHERE ID = #{ORDER_ID}
+	</update> 
+	
+	<!-- 根据订单id修改订单状态 -->
+	<update id="editOrdersStaus" parameterType="pd">
+		UPDATE ORDERS SET STATUS=#{STATUS} WHERE ID = #{ORDER_ID} 
+	</update>  
+	
+	<!-- 查询某个用户某个等级是否存在订单信息-->
+	<select id="queryHasOrders" parameterType="pd" resultType="pd">
+		SELECT U.ID,U.USER_ID,U.UPGRADE_LEVEL,U.STATUS,O.ID AS OID,O.STATUS AS ORDER_STATUS FROM JL_UPGRADE U LEFT JOIN ORDERS O ON U.ORDER_ID=O.ID WHERE U.USER_ID=#{USER_ID} AND U.UPGRADE_LEVEL=#{LEVEL}   
+	</select> 
+	<!-- 查询订单的类型 -->
+	<select id="querybyddtype" parameterType="pd" resultType="pd">
+		SELECT TYPE FROM ORDERS WHERE ID=#{ORDER_ID} 
+	</select>
+	
+	<!-- 查询活动订单是否支付 -->
+	<select id="querybyddzf" parameterType="pd" resultType="pd">
+		SELECT ID FROM ORDERS WHERE OBJECT_ID=#{ACT_ID} AND USER_ID=#{USER_ID}
+	</select>
+</mapper>

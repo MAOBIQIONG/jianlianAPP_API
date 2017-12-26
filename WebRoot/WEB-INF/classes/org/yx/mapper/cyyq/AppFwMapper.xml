@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppFwMapper">
+
+	<!-- 园区服务信息填写 -->
+	<insert id="savefw" parameterType="pd">
+		INSERT INTO zs_park_service
+		(ID,USER_ID,COMPANY_NAME,YQ_NAME,CONTACT_INFORMATION,LOGO,JOIN_CLASS,COMPANY_INTRODUCTION,CREATE_DATE,STATUS)
+		VALUES(#{SE_ID},#{USER_ID},#{COMPANY_NAME},#{YQ_NAME},#{CONTACT_INFORMATION},#{LOGO},#{JOIN_CLASS},#{COMPANY_INTRODUCTION},#{CREATE_DATE},#{STATUS})
+	</insert> 
+
+	<!-- 园区服务信息修改 -->
+	<update id="editfw" parameterType="pd" flushCache="false">
+		update zs_park_service set
+		<if test="USER_ID !=null and USER_ID!='' ">	
+			USER_ID=#{USER_ID},
+		</if>  
+		<if test="COMPANY_NAME !=null and COMPANY_NAME !='' ">
+		     COMPANY_NAME= #{COMPANY_NAME},
+		</if> 
+		<if test="YQ_NAME !=null">
+			YQ_NAME=#{YQ_NAME} ,
+		</if>   
+		<if test="CONTACT_INFORMATION !=null">
+			CONTACT_INFORMATION=#{CONTACT_INFORMATION} ,
+		</if> 
+		<if test="LOGO !=null">
+			 LOGO=#{LOGO} ,
+		</if> 
+		<if test="JOIN_CLASS !=null">
+			JOIN_CLASS=#{JOIN_CLASS}, 
+		</if>  
+		<if test="COMPANY_INTRODUCTION !=null">
+			COMPANY_INTRODUCTION=#{COMPANY_INTRODUCTION} ,
+		</if> 
+		<if test="STATUS !=null">
+			 STATUS=#{STATUS} ,
+		</if> 
+		<if test="MODIFY_DATE !=null">
+			MODIFY_DATE=#{MODIFY_DATE}, 
+		</if>  
+	    ID=#{SE_ID}
+		where ID=#{SE_ID}
+	</update>
+
+	<!-- 查询我的服务信息 -->
+	<select id="queryByfwlist" resultType="pd" parameterType="pd">
+		SELECT ZS.ID,ZS.USER_ID,ZS.CREATE_BY,ZS.COMPANY_NAME,ZS.AUDIT_DATE,ZS.LOGO,ZS.STATUS,D.NAME AS TYPE_NAME FROM zs_park_service ZS 
+		LEFT JOIN sys_dictionaries D ON ZS.JOIN_CLASS=D.BIANMA WHERE ZS.ISDEL=1 AND USER_ID=#{USER_ID}
+		<if test="JOIN_CLASS !=null and JOIN_CLASS !=''">
+		    and ZS.JOIN_CLASS=#{JOIN_CLASS}
+		</if>
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+
+	<!-- 服务信息列表（分页） -->
+	<select id="queryByfwxxlist" resultType="pd" parameterType="pd">
+		SELECT ZS.ID,ZS.USER_ID,ZS.CREATE_BY,ZS.COMPANY_NAME,ZS.AUDIT_DATE,ZS.LOGO,D.NAME AS TYPE_NAME FROM zs_park_service ZS 
+		LEFT JOIN sys_dictionaries D ON ZS.JOIN_CLASS=D.BIANMA WHERE ZS.ISDEL=1 AND ZS.STATUS='03'
+		<if test="JOIN_CLASS !=null and JOIN_CLASS !=''">
+		    and ZS.JOIN_CLASS=#{JOIN_CLASS}
+		</if>
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+
+	<!-- 服务信息详情 -->
+	<select id="queryByfwbyid" resultType="pd" parameterType="pd">
+		SELECT ZS.*,D.NAME AS TYPE_NAME FROM zs_park_service ZS LEFT JOIN sys_dictionaries
+		D ON zs.JOIN_CLASS=D.BIANMA 
+		WHERE ZS.ID=#{SE_ID}
+	</select> 
+	
+	<!-- 删除园区服务信息 -->
+	<update id="delete" parameterType="pd">
+		UPDATE zs_park_service SET ISDEL=2 WHERE ID=#{SE_ID}
+	</update>
+</mapper>

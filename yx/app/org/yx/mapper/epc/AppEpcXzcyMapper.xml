@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppEpcXzcyMapper">  
+ 
+	<!-- 我要加入小组 -->
+	<insert id="addXz" parameterType="pd">
+		INSERT INTO JL_XZ_CY(ID,PRO_ID,USER_ID,DATE,IS_ADMIN,IS_APPUSER) VALUES(#{ID},#{PRO_ID},#{USER_ID},#{DATE},#{IS_ADMIN},#{IS_APPUSER}) 
+	</insert> 
+	
+	<!-- 我要退出小组 -->
+	 <delete id="deleteXz" parameterType="pd">
+		DELETE FROM JL_XZ_CY WHERE PRO_ID=#{PRO_ID} AND USER_ID=#{USER_ID} 
+	</delete>  
+	
+	<!--判断会员是否已经加入项目小组 -->
+	<select id="chenckIsIn" parameterType="pd" resultType="pd">
+		select * from JL_XZ_CY where PRO_ID = #{PRO_ID} and USER_ID=#{USER_ID} 
+	</select> 
+	
+	<!-- 修改参与人数 -->
+	<update id="updateRights" parameterType="pd">
+		UPDATE JL_XZ_CY SET  
+		<if test="IS_ADMIN != null and IS_ADMIN !=''">
+		   IS_ADMIN=#{IS_ADMIN},
+		</if>  
+		<if test="IS_APPUSER != null and IS_APPUSER !=''">
+		   IS_APPUSER=#{IS_APPUSER},
+		</if>  
+		PRO_ID=#{PRO_ID} WHERE PRO_ID=#{PRO_ID} and USER_ID=#{USER_ID}
+    </update>  
+</mapper>

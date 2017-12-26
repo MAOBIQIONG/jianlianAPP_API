@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppProScheMapper"> 
+	
+	<!--根据项目id查询项目的阶段-->
+	<select id="findByPid" parameterType="pd" resultType="pd">
+		select * from project_schedule where PROJECT_ID = #{PRO_ID} AND ISDEL=1 ORDER BY SCHEDULE
+	</select> 
+	
+	<!-- 添加项目阶段-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO project_schedule(ID,PROJECT_ID,SCHEDULE,DATE,OPER_BY,DESCRIPTION) values(#{ID},#{PRO_ID},#{SCHEDULE},#{DATE},#{OPER_BY},#{DESCRIPTION})  
+    </insert>  
+    
+    <!--查询用户订阅的项目阶段-->
+	<select id="queryDysche" parameterType="pd" resultType="pd">
+        SELECT D.*,J.ID AS JD_ID FROM SYS_DICTIONARIES D LEFT JOIN JL_DY_JD J ON D.BIANMA =J.BIANMA and J.USER_ID=#{USER_ID} WHERE D.PARENT_ID =(SELECT ZD_ID FROM  SYS_DICTIONARIES WHERE BIANMA=#{BIANMA})
+	</select>  
+	
+	 <!--查询用户订阅的项目阶段-一个字段-->
+	<select id="queryBianMa" parameterType="pd" resultType="pd">
+		SELECT bianma FROM JL_DY_JD WHERE USER_ID=#{USER_ID}
+	</select>   
+	
+	 <!--查询用户订阅的项目阶段名称-->
+	<select id="queryDysName" parameterType="pd" resultType="pd">
+		 SELECT D.NAME FROM JL_DY_JD J LEFT JOIN SYS_DICTIONARIES D ON D.BIANMA =J.BIANMA WHERE J.USER_ID=#{USER_ID}
+	</select> 
+</mapper>

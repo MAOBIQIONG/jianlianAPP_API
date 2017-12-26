@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppRotationMapper"> 
+
+	<!--根据位置编号查找要显示的轮换大图 -->
+	<select id="queryByColno" parameterType="pd" resultType="pd">
+	  	SELECT R.* FROM ROTATION R LEFT JOIN media_title_category T ON R.COLUMN_ID=T.ID  
+	  	WHERE R.IS_SHOW=1 AND T.IS_SHOW=1 AND T.ISDEL=1  AND R.ISDEL=1
+	  	<if test="LOCATION_NO != null and LOCATION_NO != ''">
+			and T.LOCATION_NO_ID=#{LOCATION_NO}
+	 	</if> 
+	 	ORDER BY ORDER_BY
+	</select> 
+	
+	<!--根据位置编号查找要显示的广告图 -->
+	<select id="queryAdvByCol" parameterType="pd" resultType="pd">
+	  	SELECT R.* FROM ROTATION R LEFT JOIN media_title_category T ON R.COLUMN_ID=T.ID  
+	  	WHERE R.IS_SHOW=1 AND T.IS_SHOW=1 AND T.ISDEL=1  AND R.ISDEL=1 and T.LOCATION_NO_ID=#{LOCATION_NO} 
+	 	ORDER BY ORDER_BY 
+ 		<if test="startPage!=null">
+			limit #{startPage},1
+		</if> 
+	</select> 
+	
+</mapper>

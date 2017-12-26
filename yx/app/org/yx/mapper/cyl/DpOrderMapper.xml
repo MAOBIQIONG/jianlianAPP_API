@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DpOrderMapper"> 
+	
+	<!--查询某个人的订单--> 
+	<select id="queryByParam" resultType="pd" parameterType="pd">
+	    SELECT S.ID AS SHOP_ID,S.SHOP_PORTRALT,S.SHOP_NAME,P.ID AS PROD_ID,P.PROD_NAME,P.PROD_HEAD,O.ID AS ORDER_ID,O.ORDER_STATU,O.TOTAL_PRICE,
+	       O.CREATE_DATE,D.PROD_NUM,D.PROD_PRICE,D.PROD_SKUINFO FROM JL_DP_ORDER O 
+           LEFT JOIN JL_DP_ORDER_DETAIL D ON O.ORDER_NO=D.ORDER_NO 
+	       LEFT JOIN JL_DP_SHOP S ON O.SHOP_ID=S.ID 
+           LEFT JOIN JL_DP_PRODUCT P ON D.PROD_NO=P.ID
+           WHERE O.USER_ID=#{USER_ID}
+	    <if test="SHOP_NAME !=null  and SHOP_NAME!=''">	
+			and S.SHOP_NAME LIKE CONCAT(CONCAT('%', #{SHOP_NAME}),'%')
+		</if>
+		 <if test="PROD_NAME !=null  and PROD_NAME!=''">	
+			or P.PROD_NAME LIKE CONCAT(CONCAT('%', #{PROD_NAME}),'%')
+		</if> 
+	    ORDER BY O.CREATE_DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!--新增订单信息--> 
+	<insert id="saveOrder" parameterType="pd"> 
+	   INSERT INTO JL_DP_ORDER(ID,USER_ID,SHOP_ID,SHOP_ADDRESS,SHOP_PHONE,SHOP_USERNAME,ORDER_NO,TYPE,
+	   							ORDER_STATU,EXPRESS_PRICE,TOTAL_PRICE,CREATE_DATE) 
+		values(#{ORDER_ID},#{USER_ID},#{SHOP_ID},#{SHOP_ADDRESS},#{SHOP_PHONE},#{SHOP_USERNAME},
+		#{ORDER_NO},#{TYPE},#{ORDER_STATU},#{EXPRESS_PRICE},#{TOTAL_PRICE},#{CREATE_DATE})  
+	</insert> 
+	
+	<!--新增订单详细信息--> 
+	<insert id="saveDetail" parameterType="pd"> 
+	   INSERT INTO JL_DP_ORDER_DETAIL(ID,ORDER_NO,PROD_NO,PROD_NUM,PROD_PRICE,PROD_GUIGE,PROD_SKUINFO,CREATE_DATE) 
+		values(#{DETAIL_ID},#{ORDER_NO},#{PROD_NO},#{PROD_NUM},#{PROD_PRICE},#{PROD_GUIGE},#{PROD_SKUINFO},#{CREATE_DATE})  
+	</insert> 
+	
+	<!--修改订单信息--> 
+	<update id="editOrder" parameterType="pd"> 
+	   UPDATE JL_DP_ORDER SET 
+		<if test="USER_ID != null and USER_ID !=''">
+		   USER_ID=#{USER_ID},
+		</if>  
+		<if test="SHOP_ID != null and SHOP_ID !=''">
+		   SHOP_ID=#{SHOP_ID},
+		</if>  
+		<if test="SHOP_ADDRESS != null and SHOP_ADDRESS !=''">
+		   SHOP_ADDRESS=#{SHOP_ADDRESS},
+		</if>  
+		<if test="SHOP_PHONE != null and SHOP_PHONE !=''">
+		   SHOP_PHONE=#{SHOP_PHONE},
+		</if>  
+		<if test="SHOP_USERNAME != null and SHOP_USERNAME !=''">
+		   SHOP_USERNAME=#{SHOP_USERNAME},
+		</if>  
+		<if test="ORDER_NO != null and ORDER_NO !=''">
+		   ORDER_NO=#{ORDER_NO},
+		</if>  
+		<if test="TYPE != null and TYPE !=''">
+		   TYPE=#{TYPE},
+		</if>  
+		<if test="ORDER_STATU != null and ORDER_STATU !=''">
+		   ORDER_STATU=#{ORDER_STATU},
+		</if>  
+		<if test="EXPRESS_PRICE != null and EXPRESS_PRICE !=''">
+		   EXPRESS_PRICE=#{EXPRESS_PRICE},
+		</if>  
+		<if test="TOTAL_PRICE != null and TOTAL_PRICE !=''">
+		   TOTAL_PRICE=#{TOTAL_PRICE},
+		</if>  
+		<if test="CREATE_DATE != null and CREATE_DATE !=''">
+		   CREATE_DATE=#{CREATE_DATE},
+		</if>  
+		ID=#{ORDER_ID} WHERE ID=#{ORDER_ID}  
+	</update> 
+	
+	<!--修改订单详细信息--> 
+	<update id="editDetail" parameterType="pd"> 
+	 UPDATE JL_DP_ORDER_DETAIL SET 
+		<if test="ORDER_NO != null and ORDER_NO !=''">
+		   ORDER_NO=#{ORDER_NO},
+		</if>  
+		<if test="PROD_NO != null and PROD_NO !=''">
+		   PROD_NO=#{PROD_NO},
+		</if>   
+		<if test="PROD_NUM != null and PROD_NUM !=''">
+		   PROD_NUM=#{PROD_NUM},
+		</if>  
+		<if test="PROD_PRICE != null and PROD_PRICE !=''">
+		   PROD_PRICE=#{PROD_PRICE},
+		</if>   
+		<if test="PROD_GUIGE != null and PROD_GUIGE !=''">
+		   PROD_GUIGE=#{PROD_GUIGE},
+		</if>   
+		<if test="PROD_SKUINFO != null and PROD_SKUINFO !=''">
+		   PROD_SKUINFO=#{PROD_SKUINFO},
+		</if>   
+		<if test="CREATE_DATE != null and CREATE_DATE !=''">
+		   CREATE_DATE=#{CREATE_DATE},
+		</if>  
+		ID=#{DETAIL_ID} WHERE ID=#{DETAIL_ID}  
+	</update> 
+	
+	<!--修改订单状态--> 
+	<update id="editStatus" parameterType="pd"> 
+	 UPDATE JL_DP_ORDER SET ORDER_STATU=#{STATUS} WHERE ID=#{ORDER_ID}  
+	</update> 
+</mapper>

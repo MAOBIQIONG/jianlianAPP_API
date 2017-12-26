@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppXmDfMapper">
+     <!-- 添加项目代发信息-->
+	<insert id="save" parameterType="pd">
+		INSERT INTO JL_XM_DF(ID,NAME,PHONE,IMG_PATH,CREATE_DATE,STATUS,TYPE,ISSYSLOOK) values(#{ID},#{NAME},#{PHONE},#{IMG_PATH},#{CREATE_DATE},#{STATUS},#{TYPE},#{ISSYSLOOK})  
+    </insert>  
+</mapper>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppUserTokenMapper">
+
+	<!-- 保存token -->
+	<insert id="saveToken" parameterType="pd">
+		insert into s_app_users_token(
+			id,
+			s_app_users_id,
+			token,
+			last_active_date
+		)values(
+			#{id},
+			#{s_app_users_id},
+			#{token},
+			#{last_active_date}
+		)
+	</insert>
+	
+	<!-- 根据用户id查询token -->
+	<select id="findTokenByUserId" parameterType="pd" resultType="pd">
+		select * from s_app_users_token where s_app_users_id=#{s_app_users_id}
+	</select>
+	
+	<!-- 根据token查询token信息 -->
+	<select id="findToken" parameterType="pd" resultType="pd">
+		select * from s_app_users_token where token=#{Token}
+	</select>
+	
+	<!-- 根据userId修改token信息 -->
+	<update id="updateToken" parameterType="pd">
+		update s_app_users_token set token=#{token},last_active_date=#{last_active_date} where s_app_users_id=#{s_app_users_id}
+	</update>
+</mapper>

@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppActivityMapper">
+	
+	<!--查询俱乐部首页信息  STATUS='03'表示审核已通过--> 
+	<select id="queryIndexInfo" resultType="pd" parameterType="pd">
+	   SELECT A.ID,A.USER_ID,A.CREATE_BY,A.ACT_NAME,A.ACT_CONTENT,A.ACT_CITY,A.ACT_ADDR,A.START_DATE,A.ACT_IMG,A.PART_COUNT,A.STATUS,A.DUE_DATE &gt;now() as DUE_STATUS,
+	   A.END_DATE &gt;now() AS ACT_STATUS FROM ACTIVITY A WHERE A.STATUS='03' AND A.ISDEL=1 ORDER BY A.IS_HOT DESC,A.CREATE_DATE DESC limit 0,5
+	</select>
+	
+	<!--根据参数查询活动信息  STATUS='03'表示审核已通过--> 
+	<select id="queryByParam" resultType="pd" parameterType="pd">
+	   SELECT A.ID,A.USER_ID,A.CREATE_BY,A.ACT_NAME,A.ACT_CONTENT,A.ACT_CITY,A.ACT_ADDR,A.START_DATE,A.ACT_IMG,A.PART_COUNT,A.STATUS,A.DUE_DATE &gt;now() as DUE_STATUS,
+	   A.END_DATE &gt;now() AS ACT_STATUS FROM ACTIVITY A WHERE A.STATUS='03' AND A.ISDEL=1 
+	    <if test="ACT_NAME !=null">	
+			and A.ACT_NAME LIKE CONCAT(CONCAT('%', #{ACT_NAME}),'%')
+		</if>
+	    <if test="CITY !=null">	
+			and A.ACT_CITY =#{CITY}
+		</if>
+		<if test="TYPE !=null">	
+			and A.ACT_TYPE =#{TYPE}
+		</if> 
+		<if test="IS_DUE ==0">	
+			and A.DUE_DATE &gt;now()
+		</if>
+		<if test="IS_DUE ==1">	
+			and A.DUE_DATE &lt;now()
+		</if>
+		<if test="IS_DUE ==2">	
+			and A.END_DATE &lt;now()
+		</if>
+	        ORDER BY A.DUE_DATE DESC,A.IS_HOT DESC,A.CREATE_DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	
+	<!--根据Id查询活动详细信息--> 
+	<select id="queryById" resultType="pd" parameterType="pd">
+	  SELECT A.*,case A.IS_FREE WHEN '1' THEN '免费' WHEN '2' THEN '收费' END AS FEE,D.NAME AS TYPE_NAME,A.END_DATE &gt;now() AS ACT_STATUS,
+	   A.DUE_DATE &gt;now() as DUE_STATUS,A.NOPASSREASON FROM ACTIVITY A LEFT JOIN SYS_DICTIONARIES D ON A.ACT_TYPE=D.BIANMA 
+	   WHERE A.ISDEL=1 AND A.ID=#{ACT_ID} ORDER BY A.CREATE_DATE DESC
+	  <!--  SELECT A.*,case A.IS_FREE WHEN '1' THEN '免费' WHEN '2' THEN '收费' END AS FEE,U.REAL_NAME AS REAL_NAME, S.NAME AS SYS_NAME,
+	   A.END_DATE &gt;now() AS ACT_STATUS, A.DUE_DATE &gt;now() as DUE_STATUS FROM ACTIVITY A LEFT JOIN app_user U ON A.USER_ID=U.ID LEFT JOIN SYS_USER S ON A.CREATE_BY=S.ID 
+	   WHERE 1=1 AND A.ISDEL=1 
+	   <if test="ID !=null">	
+			and A.ID =#{ID}
+		</if> -->
+	</select>
+	
+	<!--根据Id查询活动简单信息--> 
+	<select id="querySimpleById" resultType="pd" parameterType="pd">
+	  SELECT * FROM ACTIVITY WHERE ID=#{ACT_ID} 
+	</select>
+	
+	<!--根据Id查询活动海报信息--> 
+	<select id="queryPoster" resultType="pd" parameterType="pd">
+	  SELECT PART_COUNT,USER_ID,CREATE_BY,YY_IMG,STATUS FROM ACTIVITY WHERE ID=#{ACT_ID} 
+	</select>
+	
+	<!-- 修改收藏次数 -->
+	<update id="updateCounts" parameterType="pd">
+		UPDATE ACTIVITY SET  
+		<if test="COLLECT_COUNT != null and COLLECT_COUNT !=''">
+		   COLLECT_COUNT=COLLECT_COUNT+1,
+		</if>
+		<if test="PART_COUNT != null and PART_COUNT !=''">
+		   PART_COUNT=#{PART_COUNT},
+		</if> 
+		ID=#{ACT_ID} WHERE ID=#{ACT_ID}
+    </update> 
+    
+    <!-- 修改参加次数 -->
+	<update id="updPartCount" parameterType="pd">
+		UPDATE ACTIVITY SET PART_COUNT=PART_COUNT+#{num} WHERE ID=#{ACT_ID}
+    </update> 
+    
+    <!--查询当前用户参与的活动列表 --> 
+	<select id="queryActByUId" resultType="pd" parameterType="pd">  
+      SELECT A.ID,A.USER_ID,A.CREATE_BY,A.ACT_NAME,A.ACT_CONTENT,A.ACT_CITY,A.ACT_ADDR,A.START_DATE,A.ACT_IMG,A.PART_COUNT,A.STATUS,A.DUE_DATE &gt;now() as DUE_STATUS,
+	   A.END_DATE &gt;now() AS ACT_STATUS FROM ACTIVITY A INNER JOIN ACTIVITY_USER U ON A.ID=U.ACTIVITY_ID AND U.USER_ID=#{USER_ID} 
+       WHERE A.ISDEL=1 ORDER BY U.APPLY_DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+	
+	<!--查询我发布的活动信息--> 
+	<select id="queryActList" resultType="pd" parameterType="pd">
+	    SELECT A.ID,A.USER_ID,A.CREATE_BY,A.ACT_NAME,A.ACT_CONTENT,A.ACT_CITY,A.ACT_ADDR,A.START_DATE,A.ACT_IMG,A.PART_COUNT,A.STATUS,A.DUE_DATE &gt;now() as DUE_STATUS,
+	   A.END_DATE &gt;now() AS ACT_STATUS,A.NOPASSREASON FROM ACTIVITY A WHERE A.ISDEL=1 AND A.USER_ID =#{USER_ID} ORDER BY A.CREATE_DATE DESC
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if> 
+	</select>  
+	
+	 <!-- 添加活动信息 -->
+	<insert id="save" parameterType="pd">
+	INSERT INTO  ACTIVITY (ID,ACT_NAME,ACT_TYPE,ACT_CONTENT,ACT_CITY,ACT_ADDR,START_DATE,END_DATE,
+	DUE_DATE,ACT_IMG,LINK_URL,USER_ID,CREATE_DATE,CREATE_BY,STATUS,LIMIT_COUNT,PRICE,VIP_PRICE,
+	VICE_PRE_PRICE,EXE_VICE_PRE_PRICE,PRESIDENT_PRICE,IS_FREE,FEE_DESCRIPTION,SPONSOR,HEADPHONE,0) 
+	VALUES (#{ACT_ID},#{ACT_NAME},#{ACT_TYPE},#{ACT_CONTENT},#{ACT_CITY},#{ACT_ADDR},#{START_DATE},#{END_DATE},
+	#{DUE_DATE},#{ACT_IMG},#{LINK_URL},#{USER_ID},#{CREATE_DATE},#{CREATE_BY},#{STATUS},#{LIMIT_COUNT},#{PRICE},
+	#{VIP_PRICE},#{VICE_PRE_PRICE},#{EXE_VICE_PRE_PRICE},#{PRESIDENT_PRICE},#{IS_FREE},#{FEE_DESCRIPTION},#{SPONSOR},#{HEADPHONE},#{ISSYSLOOK})
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd" flushCache="false">
+		UPDATE ACTIVITY SET
+			ACT_NAME=#{ACT_NAME},	
+			ACT_TYPE=#{ACT_TYPE},	
+			ACT_CONTENT=#{ACT_CONTENT},	
+			ACT_CITY=#{ACT_CITY},	
+			ACT_ADDR=#{ACT_ADDR},
+			START_DATE=#{START_DATE},
+			END_DATE=#{END_DATE},	
+			DUE_DATE=#{DUE_DATE},	 
+			LINK_URL=#{LINK_URL},
+			USER_ID=#{USER_ID}, 
+			LIMIT_COUNT=#{LIMIT_COUNT},
+			PRICE=#{PRICE},
+			VIP_PRICE=#{VIP_PRICE},
+			VICE_PRE_PRICE=#{VICE_PRE_PRICE},
+			EXE_VICE_PRE_PRICE=#{EXE_VICE_PRE_PRICE},
+			PRESIDENT_PRICE=#{PRESIDENT_PRICE},
+			IS_FREE=#{IS_FREE},
+			FEE_DESCRIPTION=#{FEE_DESCRIPTION},
+			SPONSOR=#{SPONSOR}, 
+			HEADPHONE=#{HEADPHONE}, 
+			NOPASSREASON=#{NOPASSREASON},
+			<if test="ACT_IMG !=null and ACT_IMG !='' ">
+				ACT_IMG=#{ACT_IMG},	
+			</if>
+			<if test="CREATE_DATE !=null and CREATE_DATE !='' ">
+				CREATE_DATE=#{CREATE_DATE},
+			</if>	
+			<if test="CREATE_BY !=null and CREATE_BY !='' ">
+				CREATE_BY=#{CREATE_BY},
+			</if>	
+			<if test="STATUS !=null and STATUS !='' ">
+				STATUS=#{STATUS},
+			</if>  
+			ID = #{ACT_ID}
+			WHERE ID = #{ACT_ID}
+	</update>
+	
+	 <update id="delete" parameterType="pd">
+		UPDATE ACTIVITY SET  ISDEL='2' WHERE  ID=#{ACT_ID}
+    </update>  
+	
+	
+	<!--根据活动Id查询参与者信息 -->
+	<select id="queryUserByAId" resultType="pd" parameterType="pd">
+	  SELECT U.*,P.COMPANY_NAME AS COMPANY_NAME,AU.APPLY_DATE AS APPLY_DATE FROM APP_USER U LEFT JOIN COMPANY P ON U.COMPANY_ID=P.ID  LEFT JOIN ACTIVITY_USER AU ON AU.USER_ID=U.ID
+	  WHERE AU.ACTIVITY_ID=#{ID} AND U.ISDEL=1  
+	</select>  
+    
+    <!-- 根据标题模糊查询 -->
+    <select id="queryActByName" parameterType="pd" resultType="pd">
+   		SELECT a.ID,a.ACT_NAME,a.ACT_CONTENT,'ACT' as TABLE_NAME from activity a 
+   		where a.STATUS='03' AND A.ISDEL=1
+   		 <if test="TITLE != null and TITLE !=''">
+		   AND a.ACTIVITY_NAME LIKE CONCAT(CONCAT('%',#{TITLE}),'%')
+		</if>    
+    </select>  
+    
+     <!-- 检查某用户是否已参加该活动 -->
+    <select id="checkIsApply" parameterType="pd" resultType="pd">
+    	SELECT * FROM ACTIVITY_USER WHERE ACTIVITY_ID=#{ID} AND USER_ID=#{userid} AND ISDEL=1
+    </select> 
+    
+     <!-- 某用户取消已参加的活动 -->
+    <delete id="deleteApplyer" parameterType="pd">
+    	DELETE FROM ACTIVITY_USER WHERE ACTIVITY_ID=#{ID} AND USER_ID=#{userid}
+    </delete>   
+    
+      <!-- 查询热门活动 -->
+    <select id="queryHotActivity" resultType="pd">
+    	 SELECT * FROM ACTIVITY A WHERE A.IS_HOT=1 AND  A.END_DATE &gt;now() and  A.STATUS='03' AND A.ISDEL=1 ORDER BY A.CREATE_DATE  DESC LIMIT 0,3
+    </select> 
+    
+   	<!-- 查询预约信息 -->
+    <select id="querybyYyID" parameterType="pd" resultType="pd">
+    	SELECT A.ID,A.USER_ID,A.CREATE_BY,A.ACT_CITY,A.ACT_ADDR,A.START_DATE,A.END_DATE,A.DUE_DATE,A.ACT_IMG,A.PART_COUNT,A.STATUS,A.DUE_DATE &gt;now() as DUE_STATUS,
+		A.END_DATE &gt;now() AS ACT_STATUS,A.YY_IMG FROM ACTIVITY A WHERE A.ISDEL=1 AND A.ID=#{ACT_ID}
+    </select> 
+    
+    
+    <!-- 查询五条参与人信息 -->
+    <select id="querybyCYRID" parameterType="pd" resultType="pd">
+    	SELECT AU.*,US.REAL_NAME,US.ID,US.IMG AS UNAME FROM activity_user AU LEFT JOIN APP_USER US ON AU.USER_ID=US.ID WHERE ACTIVITY_ID=#{ACT_ID}  ORDER BY APPLY_DATE DESC limit 5
+    </select> 
+    
+     <!-- 活动参与人列表 -->
+    <select id="querybyCYRlistID" parameterType="pd" resultType="pd">
+    	SELECT AU.*,US.REAL_NAME,US.ID AS UID,US.IMG AS USERIMG,ZD.NAME,CP.COMPANY_NAME,CP.ID AS COMID,US.POSITION 
+    	FROM activity_user AU LEFT JOIN 
+    	APP_USER US ON AU.USER_ID=US.ID LEFT JOIN 
+    	sys_dictionaries ZD ON US.VIP_LEVEL=ZD.BIANMA LEFT JOIN 
+    	company CP ON CP.ID=US.COMPANY_ID 
+    	WHERE ACTIVITY_ID=#{ACT_ID}
+    	ORDER BY AU.APPLY_DATE 
+    	<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if> 
+    </select> 
+    
+	<insert id="saveActivity" parameterType="pd">
+		INSERT INTO activity (ID,ACT_NAME,ACT_CITY,ACT_ADDR,START_DATE,END_DATE,DUE_DATE,ACT_IMG,USER_ID,CREATE_DATE,CREATE_BY,STATUS,ISDEL,DETAILS_IMG,YY_IMG,HDORSX)
+		VALUES(#{ID},#{ACT_NAME},#{ACT_CITY},#{ACT_ADDR},#{START_DATE},#{END_DATE},#{DUE_DATE},#{ACT_IMG},#{USER_ID},#{CREATE_DATE},#{CREATE_BY},#{STATUS},#{ISDEL},#{DETAILS_IMG},#{YY_IMG},#{HDORSX})
+	</insert>
+	
+	<!--根据Id查询活动详细信息--> 
+	<select id="queryByhb" resultType="pd" parameterType="pd">
+	 SELECT A.*,A.DUE_DATE &gt;now() as DUE_STATUS,A.END_DATE &gt;now() AS ACT_STATUS 
+		FROM ACTIVITY A LEFT JOIN SYS_DICTIONARIES D ON A.ACT_TYPE=D.BIANMA 
+		WHERE A.ISDEL=1 AND A.ID=#{ACT_ID} 
+		ORDER BY A.CREATE_DATE DESC
+	</select>
+	
+	 <!-- 查询五条参与人信息 -->
+    <select id="querybyCYRBYID" parameterType="pd" resultType="pd">
+    	SELECT US.ID,US.IMG AS UIMG FROM activity_user AU LEFT JOIN APP_USER US ON AU.USER_ID=US.ID WHERE ACTIVITY_ID=#{ACT_ID} ORDER BY APPLY_DATE  limit 5
+    </select> 
+</mapper>

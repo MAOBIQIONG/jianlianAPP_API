@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppCollectionMapper"> 
+    
+    <!-- 获取收藏交易列表信息 -->
+	<select id="queryPros" parameterType="pd" resultType="pd">
+	     SELECT '' as PROJECT_CONTENT,P.ID,P.PROJECT_NAME,P.COVER_PATH,P.IS_RESOURCE,P.USER_ID,P.CREATE_BY,P.IS_HOT,P.START_PRICE,P.CREATE_DATE,P.TOTAL_BIDDER,D.NAME AS STAGE_NAME  
+        FROM PROJECT P LEFT JOIN COLLECTION C ON P.ID=C.OBJECT_ID LEFT JOIN sys_dictionaries D ON D.BIANMA=P.PROJECT_STAGE_ID  
+	    WHERE P.ISDEL=1 AND C.USER_ID=#{USER_ID} AND C.TYPE='PROJECT' ORDER BY C.COLLECT_DATE 
+	    <if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!-- 获取收藏资讯列表信息 -->
+	<select id="queryMeds" parameterType="pd" resultType="pd">
+	    SELECT M.ID,M.IMGS,M.TITLE,M.RESOURCE,M.VIEW_COUNT FROM JL_APP_MEDIA M LEFT JOIN COLLECTION C ON M.ID=C.OBJECT_ID
+	    WHERE M.ISDEL=1 AND C.USER_ID=#{USER_ID} AND C.TYPE='JL_APP_MEDIA' ORDER BY C.COLLECT_DATE 
+	    <if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!-- 获取收藏店铺列表信息 -->
+	<select id="queryShops" parameterType="pd" resultType="pd">
+	    SELECT A.VIP_LEVEL,A.COMPANY_ID,S.ID AS SHOP_ID,S.SHOP_NAME,S.SHOP_PORTRALT,D.NAME AS LEVEL_NAME FROM JL_DP_SHOP S LEFT JOIN COLLECTION C ON S.ID=C.OBJECT_ID
+	    LEFT JOIN APP_USER A ON S.USER_ID=A.ID LEFT JOIN COMPANY P ON A.COMPANY_ID=P.ID LEFT JOIN SYS_DICTIONARIES D ON A.VIP_LEVEL=D.BIANMA 
+ 		WHERE C.USER_ID=#{USER_ID} AND C.TYPE='JL_DP_SHOP' ORDER BY C.COLLECT_DATE 
+	    <if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>   
+	</select> 
+	
+	<!-- 获取收藏ppp列表信息 -->
+	<select id="queryPpps" parameterType="pd" resultType="pd">
+	SELECT PRO.ID,PRO.PROJECT_NAME,PRO.COVER_PATH AS IMGS,PRO.USER_ID,PRO.CREATE_BY,PRO.TOTAL_INVESTMENT,PRO.CREATE_DATE,PRO.TOTAL_BIDDER,SD.NAME AS SSHY,SF.NAME AS JD,SK.NAME AS JIBIE FROM
+		PPP_PROJECT PRO LEFT JOIN sys_dictionaries SD ON
+		PRO.INDUSTRY=SD.BIANMA LEFT JOIN sys_dictionaries SF ON
+		PRO.STAGE=SF.BIANMA LEFT JOIN sys_dictionaries SK ON
+		PRO.LEVEL=SK.BIANMA LEFT JOIN COLLECTION C ON PRO.ID=C.OBJECT_ID
+		WHERE PRO.ISDEL=1 AND C.USER_ID=#{USER_ID} AND C.TYPE='PPP' ORDER BY C.COLLECT_DATE 
+	    <if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+
+	<!-- 收藏新增接口 -->
+	<insert id="saveCollection" parameterType="pd">
+		insert into collection( ID, USER_ID, COLLECT_DATE, TYPE, OBJECT_ID )
+		values( #{ID}, #{USER_ID}, #{COLLECT_DATE}, #{TYPE}, #{OBJECT_ID} )
+	</insert>
+	
+	 <!-- 收藏删除接口 -->
+	 <delete id="delCollection" parameterType="pd">
+		delete from collection where USER_ID =#{USER_ID} AND TYPE=#{TYPE} AND OBJECT_ID=#{OBJECT_ID}
+	 </delete>  
+		 
+	<!-- 查询当前用户是否 收藏过 -->
+	<select id="checkCollection" parameterType="pd" resultType="pd">
+		SELECT * FROM collection WHERE USER_ID =#{USER_ID} AND TYPE=#{TYPE} AND OBJECT_ID=#{OBJECT_ID}
+	</select>  
+
+	<!-- 修改媒体收藏次数 -->
+	<update id="updateMedCounts" parameterType="pd">
+		UPDATE JL_APP_MEDIA SET COLLECT_COUNT=#{COLLECT_COUNT} WHERE ID=#{OBJECT_ID}
+    </update> 
+    
+    <!-- 修改项目收藏次数 -->
+	<update id="updateProCounts" parameterType="pd">
+		UPDATE PROJECT SET COLLECT_COUNT=#{COLLECT_COUNT} WHERE ID=#{OBJECT_ID}
+    </update> 
+    
+    <!-- 修改活动收藏次数 -->
+	<update id="updateActCounts" parameterType="pd">
+		UPDATE ACTIVITY SET COLLECT_COUNT=#{COLLECT_COUNT} WHERE ID=#{OBJECT_ID}
+    </update> 
+    
+     <!-- 修改店铺收藏次数 -->
+	<update id="updateShopCounts" parameterType="pd">
+		UPDATE JL_DP_SHOP SET COLLECT_COUNT=#{COLLECT_COUNT} WHERE ID=#{OBJECT_ID}
+    </update> 
+    
+     <!-- 修改ppp收藏次数 -->
+	<update id="updatePppCounts" parameterType="pd">
+		UPDATE PPP_PROJECT SET COLLECT_COUNT=#{COLLECT_COUNT} WHERE ID=#{OBJECT_ID}
+    </update> 
+    
+     <!-- 修改商学院/推荐收藏次数 -->
+	<update id="updateSxyCounts" parameterType="pd">
+		UPDATE JL_JLB_SXY SET COLLECT_COUNT=#{COLLECT_COUNT} WHERE ID=#{OBJECT_ID}
+    </update>
+    
+     <!-- 根据商学院/推荐收藏数量 -->
+	<select id="querySxyByParam" parameterType="pd" resultType="pd">
+		SELECT COLLECT_COUNT FROM JL_JLB_SXY WHERE ID=#{OBJECT_ID}
+	</select>
+    <!-- 根据参数查询收藏数量 -->
+	<select id="queryShopByParam" parameterType="pd" resultType="pd">
+		SELECT COLLECT_COUNT FROM JL_DP_SHOP WHERE ID=#{OBJECT_ID}
+	</select>
+	
+	 <!-- 根据参数查询PPP项目收藏数量 -->
+	<select id="queryPppByParam" parameterType="pd" resultType="pd">
+		SELECT COLLECT_COUNT FROM PPP_PROJECT WHERE ID=#{OBJECT_ID}
+	</select>
+    
+    <!-- 根据参数查询收藏数量 -->
+	<select id="queryMedByParam" parameterType="pd" resultType="pd">
+		SELECT COLLECT_COUNT FROM JL_APP_MEDIA WHERE ID=#{OBJECT_ID}
+	</select>
+	  
+	 <!-- 根据参数查询收藏数量 -->
+	<select id="queryProByParam" parameterType="pd" resultType="pd">
+		SELECT COLLECT_COUNT FROM PROJECT WHERE ID=#{OBJECT_ID}
+	</select>  
+	
+	 <!-- 根据参数查询收藏数量 -->
+	<select id="queryActByParam" parameterType="pd" resultType="pd">
+		SELECT COLLECT_COUNT FROM ACTIVITY WHERE ID=#{OBJECT_ID}
+	</select>  
+	<!-- 获取收藏商学院、推荐列表 -->
+	<select id="querySxyxx" parameterType="pd" resultType="pd">
+	    SELECT JJS.ID,JJS.TITLE,JJS.COVER_PATH,JJS.VIEW_COUNT FROM JL_JLB_SXY JJS LEFT JOIN COLLECTION C ON JJS.ID=C.OBJECT_ID
+		WHERE C.USER_ID=#{USER_ID} AND JJS.TYPE=#{SXY_TYPE} ORDER BY JJS.CREATE_DATE 
+	    <if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>   
+	</select> 
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppInvoiceMapper">   
+
+	<!-- 发票信息 -->
+	<insert id="save" parameterType="pd">
+		insert into JL_INVOICE(ID,USER_ID,ORDER_ID,COMPANY_NAME,ADDR,NAME,PHONE,IS_EXPRESS,FEE,IS_PAY,TYPE,TAX_NO,EMAIL,CREATE_DATE)
+		values (#{ID},#{USER_ID},#{ORDER_ID},#{COMPANY_NAME},#{ADDR},#{NAME},#{PHONE},#{IS_EXPRESS},#{FEE},#{IS_PAY},#{TYPE},#{TAX_NO},#{EMAIL},#{CREATE_DATE})
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd">
+		UPDATE JL_INVOICE SET  
+		<if test="COMPANY_NAME !=null">
+		     COMPANY_NAME=#{COMPANY_NAME},
+		</if> 
+		<if test="ADDR !=null">
+		     ADDR=#{ADDR},
+		</if> 
+		<if test="USER_ID !=null">
+		     USER_ID=#{USER_ID},
+		</if> 
+		<if test="NAME !=null">
+		     NAME=#{NAME},
+		</if> 
+		<if test="PHONE !=null">
+		     PHONE=#{PHONE},
+		</if> 
+		<if test="IS_EXPRESS !=null">
+		     IS_EXPRESS=#{IS_EXPRESS},
+		</if>  
+		<if test="IS_PAY !=null">
+		     IS_PAY=#{IS_PAY},
+		</if>
+		<if test="TYPE !=null">
+		     TYPE=#{TYPE},
+		</if>
+		<if test="TAX_NO !=null">
+		     TAX_NO=#{TAX_NO},
+		</if>
+		<if test="EMAIL !=null">
+		     EMAIL=#{EMAIL},
+		</if> 
+		<if test="CREATE_DATE !=null">
+		     CREATE_DATE=#{CREATE_DATE},
+		</if> 
+		FEE=#{FEE}, 
+		ID = #{INVOICE_ID}
+		WHERE ID = #{INVOICE_ID}
+		 
+	</update>  
+	
+	<!-- 修改 -->
+	<delete id="delete" parameterType="pd">
+		delete from JL_INVOICE  WHERE ID = #{INVOICE_ID} 
+	</delete>  
+	 
+	<!-- 根据订单号查询订单信息和发票信息 --> 
+	<select id="queryInvoiceAndOrder" resultType="pd" parameterType="pd">
+	    SELECT O.*,I.ID as INID,I.IS_EXPRESS FROM  ORDERS O LEFT JOIN JL_INVOICE I ON O.ID=I.ORDER_ID  WHERE O.ID=#{ORDER_ID}
+	</select>     
+	
+	<!-- 根据订单号查询发票信息 --> 
+	<select id="queryInvoiceByOid" resultType="pd" parameterType="pd">
+	    SELECT * FROM JL_INVOICE WHERE ORDER_ID=#{ORDER_ID}
+	</select> 
+</mapper>

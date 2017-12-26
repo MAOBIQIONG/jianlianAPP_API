@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppNotiMapper">   
+
+	<insert id="save" parameterType="pd">
+		INSERT INTO sys_notification(ID,CONTENT,USER_ID,CREATE_DATE,TABLE_NAME,OBJECT_ID,STATUS,DESCRIPTION)
+		   values (#{ID},#{CONTENT},#{USER_ID},#{CREATE_DATE},#{TABLE_NAME},#{OBJECT_ID},#{STATUS},#{DESCRIPTION})
+	</insert>  
+	
+	<!-- 修改系统通知信息的状态（已读）-->
+	<update id="hasRead" parameterType="pd">
+		update sys_notification set IS_READ='1' where ID = #{NO_ID}
+	</update>
+	
+    <!-- 查询未读通知数量 -->
+	<select id="queryUnreadNum" parameterType="pd" resultType="INT"> 
+		SELECT COUNT(*) FROM sys_notification
+        WHERE IS_READ='0' AND USER_ID = #{USER_ID}
+	</select>
+	
+	<!-- 查询消息列表 -->
+	<select id="queryUnreadById" parameterType="pd" resultType="INT"> 
+		SELECT UNREAD FROM APP_USER WHERE ID = #{USER_ID}
+	</select>
+	
+	<!-- 修改app用户未读消息数量-->
+	<update id="updUnread" parameterType="pd">
+		update APP_USER set UNREAD=UNREAD-1 where ID = #{USER_ID}
+	</update>
+</mapper>

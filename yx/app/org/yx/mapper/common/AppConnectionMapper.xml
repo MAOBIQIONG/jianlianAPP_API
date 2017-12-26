@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppConnectionMapper">  
+	<!-- 我的人脉-关注 -->
+	<insert id="addconcern" parameterType="pd">
+		INSERT INTO MY_CONTRACTS(ID,USER_ID,CONTRACT_ID,DATE)
+		VALUES(#{ID},#{USER_ID},#{CONTRACTS_USER_ID},#{DATE})  
+    </insert>
+    <!-- 取消关注 -->
+    <delete id="delconcern" parameterType="pd">
+         DELETE FROM  MY_CONTRACTS WHERE USER_ID =#{USER_ID} AND CONTRACT_ID =#{CONTRACTS_USER_ID}
+    </delete>   
+	 
+	  <!-- 判断某个人是否已经加了关注 -->
+    <select id="checkConnected" parameterType="pd" resultType="pd">
+		SELECT * FROM MY_CONTRACTS WHERE USER_ID =#{USER_ID} AND CONTRACT_ID=#{CONTRACTS_USER_ID}
+	</select>   
+</mapper>

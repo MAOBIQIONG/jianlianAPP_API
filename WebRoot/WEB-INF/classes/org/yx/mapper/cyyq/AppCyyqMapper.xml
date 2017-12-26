@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppCyyqMapper">
+
+	<!-- 查询招商信息（分页） -->
+	<select id="queryzslist" resultType="pd" parameterType="pd">
+		SELECT ZI.ID,ZI.USER_ID,ZI.CREATE_BY,ZI.PARK_NAME,SD.NAME AS LEVEL_NAME,SF.NAME AS TYPE_NAME,P.IMG_PATH FROM zs_investment ZI 
+		LEFT JOIN sys_dictionaries SD ON ZI.PARK_LEVEL=SD.BIANMA 
+		LEFT JOIN sys_dictionaries SF ON SF.BIANMA=ZI.CY_PARK LEFT JOIN ZS_PARK_PICTURES P ON ZI.ID=P.PRO_ID  AND P.ORDER_BY=0  
+		WHERE ZI.ISDEL=1 AND ZI.STATUS='03' 
+		<if test="BELONG !=null and BELONG !=''">
+		    and ZI.BELONG =#{BELONG}
+		</if>
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!-- 根据项目id查询园区详情 -->
+	<select id="queryyqxq" resultType="pd" parameterType="pd">
+	    SELECT ZI.*,SD.NAME AS LEVEL_NAME,A.REAL_NAME AS MANAGER_NAME,A.PHONE AS MANAGER_NAME,YQ.NAME AS TYPE_NAME
+		FROM zs_investment ZI LEFT JOIN sys_dictionaries SD ON ZI.PARK_LEVEL=SD.BIANMA
+		LEFT JOIN APP_USER A ON ZI.JL_CONTACTS=A.ID  LEFT JOIN sys_dictionaries YQ
+		ON ZI.CY_PARK=YQ.BIANMA WHERE ZI.ISDEL=1 and ZI.ID =#{IN_ID}
+	</select>
+
+	<!--根据行业查询公司列表信息 -->
+	<select id="queryByyqlist" resultType="pd" parameterType="pd">
+		SELECT ZI.*,SD.NAME AS DJ,SU.NAME AS FZR,YQ.NAME AS YQLX
+		FROM zs_investment ZI
+		LEFT JOIN sys_dictionaries SD ON ZI.PARK_LEVEL=SD.BIANMA
+		LEFT JOIN sys_user SU ON ZI.CONTACTS_BY=SU.ID
+		LEFT JOIN sys_dictionaries YQ
+		ON ZI.CY_PARK=YQ.BIANMA
+		WHERE ZI.ISDEL=1
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+
+	<!-- 我要入驻园区 -->
+	<insert id="saveYQ" parameterType="pd">
+		INSERT INTO zs_settled_park
+		(ID,ENTERPRISE_NAME,ENTERPRISE_URL,LOGO,APPEAL,ENTERPRISE_INTRODUCE,JL_CONTACTS,YQ_NAME,NATURE,PROJECT_NAME,DISTINGUISH,CREATE_BY,CREATE_DATE,STATUS,SETTLED_TYPE)
+		VALUES
+		(#{ID},#{ENTERPRISE_NAME},#{ENTERPRISE_URL},#{LOGO},#{APPEAL},#{ENTERPRISE_INTRODUCE},#{JL_CONTACTS},#{YQ_NAME},#{NATURE},#{PROJECT_NAME},#{DISTINGUISH},#{CREATE_BY},#{CREATE_DATE},#{STATUS},#{SETTLED_TYPE})
+	</insert>
+
+	<!-- 修改入驻的园区 -->
+	<update id="editYQ" parameterType="pd" flushCache="false">
+		update
+		zs_settled_park set
+		ENTERPRISE_NAME=#{ENTERPRISE_NAME},
+		ENTERPRISE_URL=#{ENTERPRISE_URL},
+		LOGO=#{LOGO},
+		APPEAL=#{APPEAL},
+		ENTERPRISE_INTRODUCE=#{ENTERPRISE_INTRODUCE},
+		JL_CONTACTS=#{JL_CONTACTS},
+		YQ_NAME=#{YQ_NAME},
+		NATURE=#{NATURE},
+		PROJECT_NAME=#{PROJECT_NAME},
+		DISTINGUISH=#{DISTINGUISH},
+		MODIFY_BY=#{MODIFY_BY},
+		MODIFY_DATE=#{MODIFY_DATE},
+		SETTLED_TYPE=#{SETTLED_TYPE},
+		STATUS=#{STATUS}
+		where ID=#{ID}
+	</update> 
+
+	<!-- 园区信息发布 -->
+	<insert id="saveZsFb" parameterType="pd"> 
+		INSERT INTO zs_investment (ID,USER_ID,PARK_NAME,PARK_LEVEL,RELATED_URL,PROJECT_DESCRIPTION,PARK_DATE,CY_PARK,BELONG,STATUS,CREATE_DATE) VALUES
+		(#{IN_ID},#{USER_ID},#{PARK_NAME},#{PARK_LEVEL},#{RELATED_URL},#{PROJECT_DESCRIPTION},#{PARK_DATE},#{CY_PARK},#{BELONG},#{STATUS},#{CREATE_DATE})
+	</insert>
+	
+	<!-- 我是园区信息修改 -->
+	<update id="editWsyq" parameterType="pd">
+		update zs_investment set  
+		<if test="USER_ID !=null and USER_ID!='' ">	
+			USER_ID=#{USER_ID},
+		</if>  
+		<if test="PARK_NAME !=null and PARK_NAME !='' ">
+		     PARK_NAME= #{PARK_NAME},
+		</if> 
+		<if test="PARK_LEVEL !=null">
+			PARK_LEVEL=#{PARK_LEVEL} ,
+		</if>   
+		<if test="RELATED_URL !=null">
+			RELATED_URL=#{RELATED_URL} ,
+		</if> 
+		<if test="PROJECT_DESCRIPTION !=null">
+			 PROJECT_DESCRIPTION=#{PROJECT_DESCRIPTION} ,
+		</if> 
+		<if test="PARK_DATE !=null">
+			PARK_DATE=#{PARK_DATE}, 
+		</if>  
+		<if test="CONTACTS_BY !=null">
+			 CONTACTS_BY=#{CONTACTS_BY} ,
+		</if> 
+		<if test="CY_PARK !=null">
+			 CY_PARK=#{CY_PARK}, 
+		</if> 
+		<if test="BELONG">
+			BELONG=#{BELONG} ,
+		</if> 
+		<if test="STATUS!=null">
+			STATUS=#{STATUS}, 
+		</if>
+		<if test="AUDIT_BY !=null">
+			AUDIT_BY=#{AUDIT_BY},
+		</if>
+		<if test="AUDIT_DATE !=null">
+			 AUDIT_DATE=#{AUDIT_DATE},
+		</if> 
+		<if test="MODIFY_BY !=null">
+			MODIFY_BY=#{MODIFY_BY},
+		</if>
+		<if test="MODIFY_DATE !=null">
+			MODIFY_DATE=#{MODIFY_DATE},
+		</if>  
+		ID = #{IN_ID} where ID = #{IN_ID}
+	</update>
+	
+	<!-- 上传图片修改 -->
+	<update id="editZsimg" parameterType="pd" flushCache="false">
+		update zs_park_pictures set
+		IMG_PATH=#{IMG_PATH},
+		ORDER_BY=#{ORDER_BY},
+		CREATE_DATE=#{shijian}
+		where PRO_ID=#{ID} AND ID=#{IMGID}
+	</update>
+	
+	<!-- 我发布的招商信息（分页） -->
+	<select id="queryMyZSFB" resultType="pd" parameterType="pd">
+		   SELECT ZI.ID,ZI.USER_ID,ZI.CREATE_BY,ZI.STATUS,ZI.PARK_NAME,SD.NAME AS LEVEL_NAME,SF.NAME AS TYPE_NAME,P.IMG_PATH FROM zs_investment ZI 
+		LEFT JOIN sys_dictionaries SD ON ZI.PARK_LEVEL=SD.BIANMA 
+		LEFT JOIN sys_dictionaries SF ON SF.BIANMA=ZI.CY_PARK LEFT JOIN ZS_PARK_PICTURES P ON ZI.ID=P.PRO_ID  AND P.ORDER_BY=0
+		WHERE ZI.ISDEL=1 AND ZI.USER_ID=#{USER_ID} 
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>  
+	
+	<!-- 我是园区园区分类 -->
+	<select id="queryMyYqfl" resultType="pd" parameterType="pd">
+		SELECT * FROM sys_dictionaries WHERE PARENT_ID='57d1216427eb49e29be82d39b4e247c4'
+	</select>
+	
+	<!-- 我为园区服务类型 -->
+	<select id="queryMyYqlx" resultType="pd" parameterType="pd">
+		SELECT * FROM sys_dictionaries WHERE PARENT_ID='69982f6005574a8b94b3eb0ec5f67691'
+	</select>
+	
+	<!-- 产业园级别 -->
+	<select id="queryMyYqjb" resultType="pd" parameterType="pd">
+		SELECT * FROM sys_dictionaries WHERE PARENT_ID='884747e837d64fdabb3f5cd4bbd49a4b'
+	</select>
+	<!-- 发布类型 -->
+	<select id="queryMyYqfblx" resultType="pd" parameterType="pd">
+		SELECT * FROM sys_dictionaries WHERE PARENT_ID='4e39048698aa4ed59786c3b8f5410936'
+	</select>
+	
+	<!-- 查询我是园区的所有信息用于修改-->
+	<select id="queryYqInfo" resultType="pd" parameterType="pd">
+		SELECT I.*,D.NAME AS LEVEL_NAME,S.NAME AS TYPE_NAME FROM ZS_INVESTMENT I LEFT JOIN  SYS_DICTIONARIES D ON I.PARK_LEVEL=D.BIANMA 
+		LEFT JOIN SYS_DICTIONARIES S ON I.CY_PARK=S.BIANMA WHERE I.ID=#{IN_ID} 
+	</select>
+	
+	<!-- 查询我是园区的图片 -->
+	<select id="queryMyZSFBimg" resultType="pd" parameterType="pd">
+		SELECT * FROM  zs_park_pictures  WHERE PRO_ID=#{IN_ID}
+	</select>
+	
+	<!-- 上传图片 -->
+	<insert id="saveZsimg" parameterType="pd">
+		INSERT INTO zs_park_pictures (ID,IMG_PATH,PRO_ID,ORDER_BY,CREATE_DATE)
+		VALUES(#{ID},#{IMG_PATH},#{PRO_ID},#{ORDER_BY},#{CREATE_DATE})
+	</insert> 
+	
+	<!-- 删除我是园区的图片 -->
+	<delete id="deleteYqImgs" parameterType="pd">
+		DELETE FROM  zs_park_pictures  WHERE PRO_ID=#{IN_ID}
+	</delete>
+	
+	<!-- 删除我是园区信息 -->
+	<update id="delete" parameterType="pd">
+		UPDATE zs_investment SET ISDEL=2 WHERE ID=#{IN_ID}
+	</update>
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppClanUserMapper">  
+	
+	 <!-- 获取某个城市建联的关注用户的信息 -->
+	<select id="queryGzUsers" resultType="pd" parameterType="pd">
+	  SELECT  A.ID,A.REAL_NAME,A.IMG,A.POSITION,P.COMPANY_NAME FROM APP_USER A LEFT JOIN CLAN_USER C ON C.USER_ID=A.ID LEFT JOIN COMPANY P ON A.COMPANY_ID=P.ID 
+     WHERE  C.CLAN_ID=#{CLAN_ID} AND A.ISDEL=1 ORDER BY C.DATE DESC
+       <if test="pageSize!=null and start!=null">
+			limit #{start},#{pageSize}
+	   </if> 
+	</select>   
+	
+	<!-- 关注 -->
+	<insert id="save" parameterType="pd">
+		insert into CLAN_USER(ID,CLAN_ID,USER_ID,DATE) 
+		values (#{ID},#{CLAN_ID},#{USER_ID},#{DATE})
+	</insert>
+	
+	<!-- 取消关注 -->
+	 <delete id="delete" parameterType="pd" flushCache="false">
+		 DELETE FROM CLAN_USER  where USER_ID=#{USER_ID} AND CLAN_ID=#{CLAN_ID}
+	</delete> 
+	 
+	<!-- 查询当前用户是否已经关注过 -->
+	<select id="checkIsGz" resultType="pd" parameterType="pd">
+	   SELECT * FROM CLAN_USER  WHERE USER_ID=#{USER_ID} AND CLAN_ID=#{CLAN_ID}
+	</select>  
+	
+	<!-- 查询上海建联的关注人数 -->
+	<select id="querySh" resultType="pd" parameterType="pd">
+	   SELECT count(*) counts FROM CLAN_USER  WHERE CLAN_ID='e960966a28ab4d70afb3f8414b8f0002'
+	</select>  
+	
+	<!-- 查询某个建联的关注人数 -->
+	<select id="queryCounts" resultType="pd" parameterType="pd">
+	   SELECT count(*) counts FROM CLAN_USER  WHERE CLAN_ID=#{CLAN_ID}
+	</select>  
+</mapper>

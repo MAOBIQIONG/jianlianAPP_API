@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProductMapper"> 
+	
+	<!--根据参数查询商品信息--> 
+	<select id="queryByParam" resultType="pd" parameterType="pd">
+	 SELECT P.ID,P.PROD_NAME,P.PRICE,P.SALE_N,P.PROD_HEAD FROM JL_DP_PRODUCT_SHOP S LEFT JOIN JL_DP_PRODUCT P ON S.PROD_ID=P.ID 
+	 	WHERE  P.STATUS='01'
+	    <if test="PROD_NAME !=null  and PROD_NAME!=''">	
+			and P.PROD_NAME LIKE CONCAT(CONCAT('%', #{PROD_NAME}),'%')
+		</if> 
+		 <if test="SHOP_ID !=null  and SHOP_ID!=''">	
+			and S.SHOP_ID =#{SHOP_ID}
+		</if>  
+	    <if test="SALE_N !=null  and SALE_N!=''">	
+			 ORDER BY P.SALE_N DESC
+		</if> 
+		 <if test="CREATE_DATE !=null  and CREATE_DATE!=''">	
+			 ORDER BY P.CREATE_DATE DESC
+		</if> 
+		 <if test="PRICE ==0">	
+			ORDER BY P.PRICE DESC
+		</if> 
+		 <if test="PRICE ==1">	
+			ORDER BY P.PRICE ASC
+		</if>
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!--根据参数查询商品信息--> 
+	<select id="queryProdsByParam" resultType="pd" parameterType="pd">
+	 SELECT P.ID,P.PROD_NAME,P.PRICE,P.SALE_N,P.PROD_HEAD FROM JL_DP_PRODUCT P 
+	 	WHERE P.STATUS='01'
+	    <if test="PROD_NAME !=null  and PROD_NAME!=''">	
+			and P.PROD_NAME LIKE CONCAT(CONCAT('%', #{PROD_NAME}),'%')
+		</if>  
+	    <if test="SALE_N !=null  and SALE_N!=''">	
+			 ORDER BY P.SALE_N DESC
+		</if> 
+		 <if test="CREATE_DATE !=null  and CREATE_DATE!=''">	
+			 ORDER BY P.CREATE_DATE DESC
+		</if> 
+		 <if test="PRICE ==0">	
+			ORDER BY P.PRICE DESC
+		</if> 
+		 <if test="PRICE ==1">	
+			ORDER BY P.PRICE ASC
+		</if>
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select> 
+	
+	<!--根据参数查询商品信息--> 
+	<select id="queryById" resultType="pd" parameterType="pd">
+	 SELECT P.ID,P.TOTALNUM,P.PROD_NAME,P.PRICE,P.EXPRESS_PRICE,P.PROD_HEAD,P.SALE_N,S.ID AS SHOP_ID,S.SHOP_NAME,S.COLLECT_COUNT,S.USER_ID,S.ADDR FROM JL_DP_PRODUCT P LEFT JOIN JL_DP_PRODUCT_SHOP PS 
+	 ON P.ID=PS.PROD_ID LEFT JOIN JL_DP_SHOP S ON PS.SHOP_ID=S.ID WHERE P.ID=#{PROD_ID}
+	</select>  
+	
+	<!--根据参数查询商品信息--> 
+	<select id="queryBySid" resultType="pd" parameterType="pd">
+ 		SELECT count(*) as counts FROM JL_DP_PRODUCT_SHOP PS LEFT JOIN JL_DP_PRODUCT P ON PS.PROD_ID=P.ID WHERE PS.SHOP_ID=#{SHOP_ID} AND P.STATUS='01'
+	</select>  
+	
+	<!--根据参数查询推荐商品信息--> 
+	<select id="querySameByCate" resultType="pd" parameterType="pd">
+ 		SELECT D.ID,D.PROD_NAME,D.PRICE,D.PROD_HEAD,D.SALE_N FROM JL_DP_PRODUCT D WHERE D.ID!=#{PROD_ID} AND D.PROD_CATALOG=(SELECT PROD_CATALOG FROM JL_DP_PRODUCT WHERE ID=#{PROD_ID}) ORDER BY D.CREATE_DATE DESC LIMIT 0,3 
+	</select>  
+	
+	<!--根据商品信息查询店铺信息--> 
+	<select id="queryShopByPid" resultType="pd" parameterType="pd">
+        select P.ID,P.EXPRESS_PRICE,S.ID AS SHOP_ID,S.ADDR AS SHOP_ADDRESS,A.PHONE AS SHOP_PHONE,S.SHOP_NAME AS SHOP_USERNAME from jl_dp_product P 
+    	LEFT JOIN JL_DP_PRODUCT_SHOP SP ON P.ID=SP.PROD_ID LEFT JOIN JL_DP_SHOP S ON SP.SHOP_ID =S.ID LEFT JOIN APP_USER A ON S.USER_ID=A.ID 
+    	where P.ID=#{PROD_ID}	
+ 	</select>
+	 
+</mapper>

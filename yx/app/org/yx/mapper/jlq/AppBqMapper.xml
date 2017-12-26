@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppBqMapper">
+
+	<!-- 查询问题的标签 -->
+	<select id="queryByParam" parameterType="pd" resultType="pd">
+		  SELECT B.*,D.NAME FROM JL_BQ B LEFT JOIN sys_dictionaries D ON B.BIANMA=D.BIANMA WHERE WT_ID=#{WT_ID}
+	</select>   
+ 
+    <!-- 添加话题标签-->
+	<insert id="saveHtBq" parameterType="pd">
+		INSERT INTO JL_BQ(ID,WT_ID,BIANMA,DATE,ORDER_BY) values (#{ID},#{WT_ID},#{BIANMA},#{DATE},#{ORDER_BY})  
+    </insert>   
+</mapper>

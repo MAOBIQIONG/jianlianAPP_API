@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ServiceTelMapper">  
+	 
+	<!-- 查询某编码 -->
+	<select id="findBm" parameterType="String" resultType="pd">
+		 SELECT PHONE FROM JL_SERVICE_TEL WHERE BIANMA = #{BIANMA} 
+	</select>
+</mapper>

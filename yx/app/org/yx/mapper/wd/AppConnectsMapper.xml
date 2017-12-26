@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppConnectsMapper">
+
+	<!-- 我的人脉列表 (全部，根据首字母排序)-->
+	<select id="queryAllConnUsers" parameterType="pd" resultType="pd">
+		SELECT AU.ID,AU.REAL_NAME,AU.IMG,AU.POSITION,AU.VALERIE,P.COMPANY_NAME FROM MY_CONTRACTS C 
+		LEFT JOIN APP_USER AU ON C.CONTRACT_ID=AU.ID LEFT JOIN COMPANY P ON AU.COMPANY_ID=P.ID 
+		WHERE C.USER_ID=#{USER_ID} AND AU.ISDEL=1
+		<if test="NAME !=null and NAME !='' ">
+		   AND AU.REAL_NAME LIKE CONCAT(CONCAT('%', #{NAME}),'%')
+		</if>
+		ORDER BY AU.VALERIE ASC 
+	</select> 	
+	
+	<!--人脉首页我的人脉列表(5条) -->
+	<select id="queryConnUsers" parameterType="pd" resultType="pd">
+		SELECT AU.ID,AU.REAL_NAME,AU.IMG,AU.POSITION,P.COMPANY_NAME FROM MY_CONTRACTS C 
+		LEFT JOIN APP_USER AU ON C.CONTRACT_ID=AU.ID LEFT JOIN COMPANY P ON AU.COMPANY_ID=P.ID 
+		WHERE C.USER_ID=#{USER_ID} AND AU.ISDEL=1 ORDER BY C.DATE DESC LIMIT 0,5
+	</select> 
+	
+	<!-- 任意查询5条除了自己以外的会员 -->
+	<select id="queryRandUsers" parameterType="pd" resultType="pd">
+		 SELECT A.ID,A.REAL_NAME,A.IMG,A.POSITION,C.COMPANY_NAME FROM APP_USER A LEFT JOIN COMPANY C ON A.COMPANY_ID=C.ID WHERE A.ID!=#{USER_ID} AND A.ID NOT IN(SELECT M.CONTRACT_ID FROM MY_CONTRACTS M WHERE M.USER_ID=#{USER_ID}) ORDER BY  RAND() LIMIT 5
+	</select> 
+	
+	<!--拓展人脉(获取推荐人脉)-->
+	<select id="queryRecommend" parameterType="pd" resultType="pd"> 
+		SELECT AU.ID,AU.REAL_NAME,AU.IMG,AU.POSITION,CP.COMPANY_NAME FROM app_user AU,company CP,category CG 	
+		WHERE AU.COMPANY_ID=CP.ID AND CP.CATEGORY_ID=CG.ID AND (CG.ID=#{CATEGORY_ID} or CG.PID=#{CATEGORY_ID}) 
+		AND AU.ID!=#{USER_ID} AND AU.ID NOT IN (SELECT CONTRACT_ID FROM MY_CONTRACTS WHERE USER_ID=#{USER_ID}) AND AU.ISDEL=1 ORDER BY  RAND() LIMIT 5
+	</select>   
+	 
+	 <!-- 根据会员类型、行业分类、公司名称进行搜索人脉 -->
+	<select id="queryExtendsByParam" parameterType="pd" resultType="pd">
+		 SELECT A.ID,A.REAL_NAME,A.POSITION,A.IMG,C.COMPANY_NAME FROM APP_USER A LEFT JOIN COMPANY C ON A.COMPANY_ID=C.ID 
+		 LEFT JOIN CATEGORY G ON C.CATEGORY_ID=G.ID WHERE 1=1 AND A.ID !=#{USER_ID} AND A.ID NOT IN (SELECT M.CONTRACT_ID FROM my_contracts M WHERE M.USER_ID=#{USER_ID}) AND A.ISDEL=1
+		 <if test="COMPANY_NAME !=null and COMPANY_NAME!=''">
+		    and C.COMPANY_NAME LIKE CONCAT(CONCAT('%', #{COMPANY_NAME}),'%')
+		</if>
+		 <if test="REAL_NAME !=null and REAL_NAME!=''">
+		    OR A.REAL_NAME LIKE CONCAT(CONCAT('%', #{REAL_NAME}),'%')
+		</if>
+		 <if test="VIP_LEVEL !=null and VIP_LEVEL!=''">
+		    and A.VIP_LEVEL =#{VIP_LEVEL}
+		</if>
+		 <if test="CATEGORY_ID !=null and CATEGORY_ID!=''">
+		    and (G.ID =#{CATEGORY_ID} or G.PID =#{CATEGORY_ID})
+		</if> 
+		<if test="start!=null and pageSize!=null">
+			limit #{start},#{pageSize}
+		</if>
+	</select>
+	 
+	<!-- 我的人脉关注 -->
+	<insert id="save" parameterType="pd">
+		INSERT INTO MY_CONTRACTS(ID,USER_ID,CONTRACT_ID,DATE)
+		VALUES(#{ID},#{USER_ID},#{CONTRACT_ID},#{DATE})  
+    </insert>
+    
+    <!-- 取消关注 -->
+     <delete id="delete" parameterType="pd">
+    	DELETE FROM  MY_CONTRACTS WHERE USER_ID =#{USER_ID} AND CONTRACT_ID =#{CONTRACT_ID}
+    </delete>  
+	 
+	 <!-- 判断某个人是否已经加了关注 -->
+    <select id="checkIsGz" parameterType="pd" resultType="pd">
+		SELECT * FROM MY_CONTRACTS WHERE USER_ID =#{USER_ID} AND CONTRACT_ID=#{CONTRACT_ID}
+	</select>  
+</mapper>

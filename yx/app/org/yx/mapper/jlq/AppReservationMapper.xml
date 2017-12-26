@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppReservationMapper">
+
+<!-- 咨询提交接口 -->
+<insert id="saveReservation" parameterType="pd" >
+	insert into club_reservation(
+	ID,
+	START_DATE,
+	END_DATE,
+	TYPE_ID,
+	PEOPLE_AMOUNT, 	
+	LINK_MAN,
+	LINK_PHONE,
+	DESCRIPTION,
+	CREATE_DATE,
+	MODIFY_BY,
+	MODIFY_DATE,
+	STATUS,
+	BUDGET
+	)
+	values(
+	#{ID},
+	#{START_DATE},
+	#{END_DATE},
+	#{TYPE_ID},
+	#{PEOPLE_AMOUNT},
+	#{LINK_MAN},
+	#{LINK_PHONE},
+	#{DESCRIPTION},
+	#{CREATE_DATE},
+	#{MODIFY_BY},
+	#{MODIFY_DATE},
+	#{STATUS},
+	#{BUDGET}
+	)
+</insert>
+	<!-- 通过年月获取数据某一月份的数据 -->
+	<select id="findByYearAndMonth" parameterType="pd" resultType="pd">
+		select * from club_reservation where STATUS=1 AND START_DATE LIKE CONCAT(CONCAT('%', #{START_DATE}),'%') AND ISDEL=1
+	</select>
+</mapper>
